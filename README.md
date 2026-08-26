@@ -23,8 +23,7 @@ yourself.
 | [`skills/handoff/`](skills/handoff/SKILL.md) | Session handoff: writes the task state into a file before context quality degrades. Writer-controlled alternative to `/compact` — you decide what survives, not the summarizer. |
 | [`skills/pickup/`](skills/pickup/SKILL.md) | Counterpart: a fresh session finds the handoff, verifies it against reality (git, files), and continues from the NEXT step. |
 | [`statusline/statusline.sh`](statusline/statusline.sh) | Status line with the number that drives my whole workflow: context % with traffic-light colors (green <30, yellow 30–40, red above), plus model/style, git branch, and rate-limit windows. |
-
-More coming: specialized agents, review panel.
+| [`agents/`](agents/) | The team: implementers (Geralt — backend, Lyutik — frontend), the review panel (Agatha / Arthur / Dash — three models, one diff), and specialists (Jobs — UI/UX, Lauda — performance, Gilfoyle — security). |
 
 ## Install
 
@@ -121,6 +120,52 @@ Register it in `~/.claude/settings.json`:
 
 Parses the status JSON with `jq` when present, falls back to `python3`. Runs in
 ~20ms — it never slows the session down.
+
+### Agents
+
+```bash
+mkdir -p ~/.claude/agents
+cp agents/*.md ~/.claude/agents/
+```
+
+Named after characters from shows I like — that's how I remember who does what,
+and it makes the day more fun. The pattern matters more than the names: a
+narrowly-focused agent with a project-tuned prompt beats a general session at
+its specialty, and the main session stays an orchestrator — it hands out work
+and checks results against the spec instead of burning its own context on
+implementation.
+
+**Implementers** — the main session doesn't write code, these do:
+
+- **Geralt** (backend) — modern Python, async discipline, does the dirty work
+  quietly and shows test output as proof.
+- **Lyutik** (frontend) — React/Next/TypeScript, and explains WHY at every
+  decision so a backend-leaning owner learns instead of just pasting. Geralt
+  works in silence; Lyutik makes it look good and talks about it. Naturally.
+
+**Review panel** — three reviewers, same diff, different eyes:
+
+- **Agatha** (Claude Opus) — deep architectural review, reads everything.
+- **Arthur** (wrapper around the Codex CLI — requires it installed) — the
+  cross-vendor second opinion; different model families genuinely find
+  different bugs in the same code.
+- **Dash** (Claude Sonnet) — the fast, sharp third lens.
+
+All three share two hard rules baked into their prompts: the caller gives them
+only the spec and the code (no "we already fixed X" — it biases the review),
+and a re-review runs with a byte-identical prompt (priming a reviewer with
+"verify our fixes" is how bugs get waved through).
+
+**Specialists** — for questions where a general session answers shallowly:
+
+- **Jobs** — UI/UX: design tokens, component specs, accessibility.
+- **Lauda** — performance: N+1s, async misuse, LLM token waste.
+- **Gilfoyle** — security: thinks like an attacker, reports like an engineer.
+
+One agent is deliberately missing: my product-marketing agent is so tuned to
+its project (real funnel tables, real data caveats) that publishing it would
+be pointless — which is exactly the argument for writing your own instead of
+collecting generic ones.
 
 ## License
 
