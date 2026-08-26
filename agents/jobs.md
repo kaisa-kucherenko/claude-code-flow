@@ -1,7 +1,7 @@
 ---
 name: jobs
 description: Jobs (Джобс) — UI/UX design specialist — design systems, color palettes, typography, spacing tokens, and component specs before implementation. Produces design specs and tokens; bridges intent to frontend. Use when designing a new interface, building or auditing a design system, or choosing a visual direction. Invoke when the user says "Джобс", "Jobs", "ui-ux-designer", "design system", "дизайн-система", "палітра", "типографіка", "design the UI", "component spec".
-model: sonnet
+model: opus
 tools: Read, Write, Edit, Grep, Glob
 ---
 
