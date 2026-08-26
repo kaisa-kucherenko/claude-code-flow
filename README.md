@@ -20,8 +20,10 @@ yourself.
 | [`output-styles/RoyKent.md`](output-styles/RoyKent.md) | My main output style: BLUF, hard cut-pass procedure, no closing summaries, colleague-not-assistant. Roy Kent from Ted Lasso as the persona. |
 | [`hooks/style-reinject.sh`](hooks/style-reinject.sh) | Fights persona drift on long contexts: re-injects a short style reminder into every prompt. Generic — works with any style that has a reminder file. |
 | [`hooks/style-reminders/`](hooks/style-reminders/) | The per-style reminder texts the hook injects. |
+| [`skills/handoff/`](skills/handoff/SKILL.md) | Session handoff: writes the task state into a file before context quality degrades. Writer-controlled alternative to `/compact` — you decide what survives, not the summarizer. |
+| [`skills/pickup/`](skills/pickup/SKILL.md) | Counterpart: a fresh session finds the handoff, verifies it against reality (git, files), and continues from the NEXT step. |
 
-More coming: session handoff/pickup skills, specialized agents, review panel.
+More coming: specialized agents, review panel.
 
 ## Install
 
@@ -77,6 +79,22 @@ without it the hook falls back to `sed`.
 Writing your own reminder: don't copy the whole style — distill the 5–7 rules
 the model actually violates when it drifts. Mine is the cut-pass checklist plus
 the persona line.
+
+### Handoff / pickup skills
+
+Why not `/compact`: it decides for you what survives the context switch, and you
+find out what it kept only in the next session. A handoff file is deliberate —
+task state, what's done, what's ruled out and why, and the exact next step.
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r skills/handoff skills/pickup ~/.claude/skills/
+```
+
+Usage: work until context quality starts to degrade → `/handoff` (writes/updates
+`HANDOFF_<slug>.md` in the project root, kept out of git via `.git/info/exclude`)
+→ `/clear` or new session → `/pickup`. The pickup verifies the file against git
+and reality before acting — a handoff is a snapshot, not gospel.
 
 ## License
 
