@@ -22,6 +22,7 @@ yourself.
 | [`hooks/style-reminders/`](hooks/style-reminders/) | The per-style reminder texts the hook injects. |
 | [`skills/handoff/`](skills/handoff/SKILL.md) | Session handoff: writes the task state into a file before context quality degrades. Writer-controlled alternative to `/compact` — you decide what survives, not the summarizer. |
 | [`skills/pickup/`](skills/pickup/SKILL.md) | Counterpart: a fresh session finds the handoff, verifies it against reality (git, files), and continues from the NEXT step. |
+| [`statusline/statusline.sh`](statusline/statusline.sh) | Status line with the number that drives my whole workflow: context % with traffic-light colors (green <30, yellow 30–40, red above), plus model/style, git branch, and rate-limit windows. |
 
 More coming: specialized agents, review panel.
 
@@ -95,6 +96,31 @@ Usage: work until context quality starts to degrade → `/handoff` (writes/updat
 `HANDOFF_<slug>.md` in the project root, kept out of git via `.git/info/exclude`)
 → `/clear` or new session → `/pickup`. The pickup verifies the file against git
 and reality before acting — a handoff is a snapshot, not gospel.
+
+### Status line
+
+Puts the context-usage percentage permanently in front of you. Watching this
+number is how I found my working rule: quality is sharp below ~30% of the
+context window, degrades noticeably after — so the thresholds are green <30%,
+yellow 30–40% (time to `/handoff`), red above. Not a benchmark, an observation —
+but a stubbornly repeatable one. Also shows model + active style, git branch,
+and Pro/Max rate-limit windows with reset time.
+
+```bash
+cp statusline/statusline.sh ~/.claude/
+chmod +x ~/.claude/statusline.sh
+```
+
+Register it in `~/.claude/settings.json`:
+
+```json
+{
+  "statusLine": { "type": "command", "command": "~/.claude/statusline.sh" }
+}
+```
+
+Parses the status JSON with `jq` when present, falls back to `python3`. Runs in
+~20ms — it never slows the session down.
 
 ## License
 
