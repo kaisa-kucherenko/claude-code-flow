@@ -11,8 +11,13 @@ implementation.
 
 ```bash
 mkdir -p ~/.claude/agents
-cp *.md ~/.claude/agents/
+cp agents/{agatha,arthur,dash,geralt,gilfoyle,jobs,lauda,lyutik}.md ~/.claude/agents/
 ```
+
+Arthur additionally needs the [Codex CLI](https://github.com/openai/codex)
+installed and configured (`~/.codex/config.toml` picks the model); to run him
+without a permission prompt each time, allow `Bash(codex exec:*)` in your
+Claude Code permissions.
 
 ## Implementers — the main session doesn't write code, these do
 
@@ -36,13 +41,16 @@ The three prompt files are deliberately different in shape — Agatha is written
 as an identity ("what meticulousness means to you"), Dash as a terse process,
 Arthur as a CLI protocol — because depth, speed, and wrapping are different
 jobs. What IS uniform is what must merge: a shared severity scale
-(BLOCKING / IMPORTANT / NIT, exact labels) and two hard rules baked into
-every prompt:
+(BLOCKING / IMPORTANT / NIT, exact labels) and two rules — a caller convention,
+with the reviewer prompts written to enforce it even when the caller slips:
 
-1. **The reviewer gets only the spec and the code.** No "we already fixed X" —
-   it points the review down a corridor and blinds it to everything else.
-2. **A re-review runs with a byte-identical prompt.** Priming a reviewer with
-   "verify our fixes" is how bugs get waved through.
+1. **The briefing is neutral: spec, code, context — never "we already fixed X".**
+   It points the review down a corridor and blinds it to everything else; the
+   prompts explicitly refuse that frame.
+2. **A re-review is a fresh review with the same neutral briefing** — no
+   "verify our fixes". Priming a reviewer toward confirmation is how bugs get
+   waved through; the prompts treat it as a signal to read with extra
+   independence.
 
 The panel is orchestrated by [`../workflows/precogs.js`](../workflows/precogs.js)
 — parallel run, then a synthesis agent that dedupes and cross-votes the

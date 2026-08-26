@@ -15,8 +15,8 @@ per-prompt reminder — so the pattern is vendor-approved.)
 
 ```bash
 mkdir -p ~/.claude/hooks
-cp style-reinject.sh ~/.claude/hooks/
-cp -r style-reminders ~/.claude/
+cp hooks/style-reinject.sh ~/.claude/hooks/
+cp -r hooks/style-reminders ~/.claude/
 ```
 
 Register it in `~/.claude/settings.json`:

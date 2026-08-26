@@ -19,7 +19,7 @@ bilingually — the mechanics are language-agnostic; adapt the examples.
 
 ```bash
 mkdir -p ~/.claude/output-styles
-cp RoyKent.md ~/.claude/output-styles/
+cp output-styles/RoyKent.md ~/.claude/output-styles/
 ```
 
 Activate it either way:

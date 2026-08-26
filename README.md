@@ -20,12 +20,12 @@ yourself.
 | Output style | BLUF, hard cut-pass, no closing summaries, colleague-not-assistant. Roy Kent from Ted Lasso as the persona. | [`output-styles/`](output-styles/) |
 | Persona re-inject hook | Fights persona drift on long contexts: re-injects a short style reminder into every prompt. | [`hooks/`](hooks/) |
 | Handoff / pickup skills | Deliberate session switching instead of `/compact`: you decide what survives, the next session verifies it against reality. | [`skills/`](skills/) |
-| Status line | The context-% number that drives the whole workflow, with traffic-light thresholds (green <30%, yellow 30–40%, red above). | [`statusline/`](statusline/) |
+| Status line | The context-% number that drives the whole workflow, with traffic-light thresholds (green <30%, yellow 30–39%, red at 40+). | [`statusline/`](statusline/) |
 | Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle). | [`agents/`](agents/) |
 | Precogs workflow | Orchestrates the panel: three reviewers in parallel, then a synthesis that dedupes and cross-votes findings. | [`workflows/`](workflows/) |
 
 Each folder's README has the install steps and the reasoning; everything
-targets `~/.claude`.
+targets `~/.claude`. Run all install commands from the repo root.
 
 ## The flow in one paragraph
 

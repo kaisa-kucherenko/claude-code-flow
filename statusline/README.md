@@ -3,7 +3,7 @@
 Puts the context-usage percentage permanently in front of you. Watching this
 number is how I found my working rule: quality is sharp below ~30% of the
 context window, degrades noticeably after — so the thresholds are green <30%,
-yellow 30–40% (time to `/handoff`), red above. Not a benchmark, an
+yellow 30–39% (time to `/handoff`), red at 40+. Not a benchmark, an
 observation — but a stubbornly repeatable one.
 
 Also shows model + active output style, git branch, virtualenv, and Pro/Max
@@ -12,7 +12,7 @@ rate-limit windows (5h / 7d) with the reset time.
 ## Install
 
 ```bash
-cp statusline.sh ~/.claude/
+cp statusline/statusline.sh ~/.claude/
 chmod +x ~/.claude/statusline.sh
 ```
 

@@ -33,7 +33,7 @@ Arthur).
 
 ```bash
 mkdir -p ~/.claude/workflows
-cp precogs.js ~/.claude/workflows/
+cp workflows/precogs.js ~/.claude/workflows/
 ```
 
 Then ask the session to run it: "run the precogs workflow on this diff" — or

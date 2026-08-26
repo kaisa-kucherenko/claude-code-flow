@@ -46,7 +46,8 @@ fi
 if [[ -n "$project_dir" && -n "$cwd" ]]; then
     display_path="${project_dir##*/}${cwd#"$project_dir"}"
 else
-    display_path="${cwd/#$HOME/~}"
+    # Escaped tilde: bare ~ in the replacement is expanded back to $HOME (no-op)
+    display_path="${cwd/#$HOME/\~}"
 fi
 
 # Git branch (works in subdirectories)

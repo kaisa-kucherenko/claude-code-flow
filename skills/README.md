@@ -18,7 +18,7 @@ next step.
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -r handoff pickup ~/.claude/skills/
+cp -r skills/handoff skills/pickup ~/.claude/skills/
 ```
 
 ## Usage cycle

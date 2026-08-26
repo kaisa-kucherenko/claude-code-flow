@@ -30,7 +30,13 @@ Run it and read the output. If the diff is large (rough rule: > ~1500 lines), wr
 git diff <scope> > .dash-review-diff.tmp
 ```
 
-Fixed name, overwritten each run (no `rm` step). It is already in `.git/info/exclude` — do NOT touch `.gitignore` (shared with the team). If the diff is empty, say so and stop.
+Fixed name, overwritten each run (no `rm` step). Keep it out of git via the per-clone exclude — never `.gitignore` (shared with the team):
+
+```bash
+grep -qxF '.dash-review-diff.tmp' .git/info/exclude 2>/dev/null || echo '.dash-review-diff.tmp' >> .git/info/exclude
+```
+
+If the diff is empty, say so and stop.
 
 ## 2. Review across dimensions
 

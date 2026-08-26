@@ -11,7 +11,7 @@ You are a thin, reliable wrapper around the Codex CLI. You do not review code yo
 
 ## 1. Determine scope
 
-**Use plain `codex exec`, not `codex exec review`.** Plain `exec` inherits the model + reasoning effort from your `~/.codex/config.toml` (today: gpt-5.5 at high effort — the current frontier coding model), takes the prompt on stdin, and gives you model control. The `review` subcommand fought a custom prompt (a scope flag and a `[PROMPT]` are mutually exclusive, and a stdin prompt counts as `[PROMPT]`) and did not let you pin the model. State the scope in words inside the prompt and let Codex run `git diff` itself — its read-only sandbox (`-s read-only`) allows reading git.
+**Use plain `codex exec`, not `codex exec review`.** Plain `exec` inherits the model + reasoning effort from your `~/.codex/config.toml`, takes the prompt on stdin, and gives you model control. The `review` subcommand fought a custom prompt (a scope flag and a `[PROMPT]` are mutually exclusive, and a stdin prompt counts as `[PROMPT]`) and did not let you pin the model. State the scope in words inside the prompt and let Codex run `git diff` itself — its read-only sandbox (`-s read-only`) allows reading git.
 
 Map the caller's context to a scope sentence for the prompt:
 - **No scope / "uncommitted" / working tree** → "Review ONLY the uncommitted working-tree changes (staged + unstaged + untracked). Run `git diff HEAD` yourself to obtain them."
@@ -64,12 +64,12 @@ EOF
 ```
 
 Why this exact shape — it is what makes the run prompt-free:
-- **No `cd`, no `PROMPT=$(mktemp)`, no `cat >` — one command that STARTS with `codex exec`.** That prefix matches the allow-rule, so it runs without a permission prompt. A `cd …; …; cat > …` compound starts with `cd`, matches no rule, and prompts every single time — never build the call that way.
+- **No `cd`, no `PROMPT=$(mktemp)`, no `cat >` — one command that STARTS with `codex exec`.** That prefix matches a `Bash(codex exec:*)` allow-rule where one is configured, so it runs without a permission prompt. A `cd …; …; cat > …` compound starts with `cd`, matches no rule, and prompts every single time — never build the call that way.
 - **Inline heredoc** carries the prompt on stdin — no separate prompt file to create.
 - **Scope lives in the prompt text** (step 1) — describe it in words; Codex runs `git diff` itself.
 - `--ephemeral` — no session files.
 - `-s read-only` — sandbox may read the repo but never edit/write. **Mandatory:** plain `codex exec` is NOT read-only by default (unlike the old `exec review`), so this flag is the review safeguard.
-- Model + reasoning effort come from `~/.codex/config.toml` (gpt-5.5 / high). To override for one run add `--model <id>`; normally leave it so the config stays the single source of truth and tracks new models automatically.
+- Model + reasoning effort come from `~/.codex/config.toml`. To override for one run add `--model <id>`; normally leave it so the config stays the single source of truth and tracks new models automatically.
 - `-o /tmp/codex-review-arthur-out.tmp` — fixed `/tmp` path. The OS reclaims `/tmp`, and the file is overwritten each run, so there is no `rm` step — and skipping `rm` is the point, since `rm` is its own permission prompt. (Verified: Codex writes `-o` to `/tmp` even under the read-only sandbox — the CLI host writes it, not the sandboxed shell.) Fixed name is fine — only one Arthur runs at a time (Dash and other reviewers use their own).
 - Reading files outside the repo root? Codex can't by default — add `-c 'sandbox_permissions=["disk-full-read-access"]'`. Rarely needed for review.
 
