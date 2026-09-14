@@ -11,7 +11,7 @@ implementation.
 
 ```bash
 mkdir -p ~/.claude/agents
-cp agents/{agatha,arthur,dash,geralt,gilfoyle,jobs,lauda,lyutik}.md ~/.claude/agents/
+cp agents/{agatha,ariel,arthur,dash,geralt,gilfoyle,jobs,lauda,lyutik}.md ~/.claude/agents/
 ```
 
 Arthur additionally needs the [Codex CLI](https://github.com/openai/codex)
@@ -63,6 +63,7 @@ findings.
 | [`jobs.md`](jobs.md) | UI/UX: design tokens, component specs, accessibility baked in from the token layer. |
 | [`lauda.md`](lauda.md) | Performance: N+1s, async misuse, LLM token waste, cold starts. Measures, never guesses. |
 | [`gilfoyle.md`](gilfoyle.md) | Security: thinks like an attacker, reports like an engineer. |
+| [`ariel.md`](ariel.md) | Mermaid diagrams: one idea per picture, labelled edges, full words. Read-only — returns blocks, the caller pastes them. Draws the scenes of the ADR storyboard (see [`../skills/adr/`](../skills/adr/SKILL.md)). |
 
 One agent is deliberately missing: my product-marketing agent is so tuned to
 its project (real funnel tables, real data caveats) that publishing it would
