@@ -10,6 +10,7 @@ if command -v jq &>/dev/null; then
         @sh "project_dir=\(.workspace.project_dir // "")",
         @sh "model=\(.model.display_name // "Sonnet")",
         @sh "style=\(.output_style.name // "")",
+        @sh "effort=\(.effort.level // "")",
         @sh "context_percent=\(.context_window.used_percentage // 0 | floor)",
         @sh "five_h=\(.rate_limits.five_hour.used_percentage // "" | if . == "" then "" else floor end)",
         @sh "five_h_reset=\(.rate_limits.five_hour.resets_at // "")",
@@ -21,6 +22,7 @@ else
     read -r project_dir
     read -r model
     read -r style
+    read -r effort
     read -r context_percent
     read -r five_h
     read -r five_h_reset
@@ -35,6 +37,7 @@ print(d.get("workspace",{}).get("current_dir",""))
 print(d.get("workspace",{}).get("project_dir",""))
 print(d.get("model",{}).get("display_name","Sonnet"))
 print(d.get("output_style",{}).get("name",""))
+print((d.get("effort") or {}).get("level",""))
 print(int(d.get("context_window",{}).get("used_percentage",0)))
 print("" if fh.get("used_percentage") is None else int(fh["used_percentage"]))
 print(fh.get("resets_at") or "")
@@ -68,25 +71,29 @@ venv=""
 # statusline, and 16-color codes come out olive/washed on top of that; explicit
 # 256-color foregrounds survive the dimming (see claude-code issue #42382).
 DIM='\033[2;37m'          # Dim white — labels/chrome only, never numbers
-PURPLE='\033[38;5;183m'   # Lilac/lavender
+PURPLE='\033[38;5;183m'   # Lilac/lavender — model bracket
+STEEL='\033[38;5;110m'    # Muted steel blue — output-style bracket, a step apart from the model
 RESET='\033[0m'
 GREEN='\033[38;5;78m'     # True green (16-color 32 renders olive here)
 YELLOW='\033[38;5;221m'
 AMBER='\033[38;5;214m'    # Burshtyn — usage limits warning tier
 RED='\033[38;5;203m'
 
+# Effort is a model setting (the live /effort value), so it shares the model's bracket;
+# the output style gets its own so the effort cannot read as a property of the persona.
+model_label="$model"
+[[ -n "$effort" ]] && model_label+=" | ${effort}"
+
 # Build output
 out="${DIM}${venv}${display_path}${RESET}"
 [[ -n "$branch" ]] && out+=" ${DIM}⎇ ${branch}${RESET}"
-if [[ -n "$style" && "$style" != "default" ]]; then
-    out+=" ${PURPLE}[${model} / ${style}]${RESET}"
-else
-    out+=" ${PURPLE}[${model}]${RESET}"
-fi
+out+=" ${PURPLE}[${model_label}]${RESET}"
+[[ -n "$style" && "$style" != "default" ]] && out+=" ${STEEL}[${style}]${RESET}"
 
 # Context % with traffic light colors
 context_percent=${context_percent:-0}
 if (( context_percent > 0 )); then
+    out+=" ${DIM}| ctx${RESET}"
     if (( context_percent < 30 )); then
         out+=" ${GREEN}${context_percent}%${RESET}"
     elif (( context_percent < 40 )); then

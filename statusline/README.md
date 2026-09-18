@@ -6,8 +6,10 @@ context window, degrades noticeably after — so the thresholds are green <30%,
 yellow 30–39% (time to `/handoff`), red at 40+. Not a benchmark, an
 observation — but a stubbornly repeatable one.
 
-Also shows model + active output style, git branch, virtualenv, and Pro/Max
-rate-limit windows (5h / 7d) with the reset time.
+Also shows model + reasoning effort + active output style, git branch,
+virtualenv, and Pro/Max rate-limit windows (5h / 7d) with the reset time. The
+effort is the live value (it follows a mid-session `/effort`), so a per-model
+override in `modelSettings` is visible without opening the settings file.
 
 ## Install
 
