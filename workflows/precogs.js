@@ -37,6 +37,8 @@ ${spec}
 Context: ${context}
 Key files: ${files}
 
+An assumption about the environment stated in a comment (timezone of a column or process, encoding, locale, a default) is verified against the running environment or reported as UNVERIFIED — never confirmed by reading the comment.
+
 Running tests: a "skipped" line on a DB-gated / integration test is NOT a pass — it almost always means the test's DB/env prerequisites weren't met (stub env vars, unsourced local config). Find the project's documented way to run them (e.g. CLAUDE.md "Running tests" / "backend tests"), which typically means sourcing a local env file and using the service venv before pytest. Prefer actually running the tests over reasoning about them; if you genuinely cannot, say so explicitly — never report skipped tests as passing.
 
 Group findings by severity BLOCKING / IMPORTANT / NIT (shared scale). For each finding: file:line — the issue — a concrete fix. Be skeptical; a clean verdict is a valid result. Flag any finding whose validity depends on code you could not see.`
@@ -61,6 +63,10 @@ const [agatha, arthur, dash] = await parallel([
 const round1 = { agatha, arthur, dash }
 let final = round1
 
+// A reviewer that failed or timed out comes back null/undefined; interpolating that
+// verbatim hands the peers and the synthesis the literal word "null" as a review.
+const text = (review, name) => review ?? `(${name} did not return a review — treat as absent, not as clean)`
+
 if (rounds >= 2) {
   phase('Cross-examine')
 
@@ -81,10 +87,10 @@ Two other reviewers examined this SAME change independently. Their round-1 findi
 Tag each final finding CONFIRMED / DISPUTED / CONCEDED / RETRACTED / NEW, keeping the BLOCKING / IMPORTANT / NIT scale.
 
 === ${personaName[peers[0]]} (round 1) ===
-${round1[peers[0]]}
+${text(round1[peers[0]], personaName[peers[0]])}
 
 === ${personaName[peers[1]]} (round 1) ===
-${round1[peers[1]]}`
+${text(round1[peers[1]], personaName[peers[1]])}`
   }
 
   const [agatha2, arthur2, dash2] = await parallel([
@@ -110,13 +116,13 @@ Produce ONE synthesized report:
 Do NOT invent findings or inflate severity. If all three say clean, the verdict is clean.
 
 === AGATHA (Claude Opus, deep file-aware) ===
-${final.agatha}
+${text(final.agatha, 'Agatha')}
 
 === ARTHUR (Codex, file-aware CLI) ===
-${final.arthur}
+${text(final.arthur, 'Arthur')}
 
 === DASH (Claude Sonnet, fast focused pass) ===
-${final.dash}`
+${text(final.dash, 'Dash')}`
 
 const synthesis = await agent(synthPrompt, { label: 'Synthesis', phase: 'Synthesize' })
 

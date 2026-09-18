@@ -19,9 +19,10 @@ yourself.
 |-----------|--------------|------|
 | Output style | BLUF, hard cut-pass, no closing summaries, colleague-not-assistant. Roy Kent from Ted Lasso as the persona. | [`output-styles/`](output-styles/) |
 | Persona re-inject hook | Fights persona drift on long contexts: re-injects a short style reminder into every prompt. | [`hooks/`](hooks/) |
+| Development-cycle skills | `adr` → `spec` → `implement` → `twix`: decide with an explicit yes each, cut into phases, run one phase per commit, review with a neutral panel. | [`skills/`](skills/) |
 | Handoff / pickup skills | Deliberate session switching instead of `/compact`: you decide what survives, the next session verifies it against reality. | [`skills/`](skills/) |
 | Status line | The context-% number that drives the whole workflow, with traffic-light thresholds (green <30%, yellow 30–39%, red at 40+). | [`statusline/`](statusline/) |
-| Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle). | [`agents/`](agents/) |
+| Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle), a diagram drawer (Ariel). | [`agents/`](agents/) |
 | Precogs workflow | Orchestrates the panel: three reviewers in parallel, then a synthesis that dedupes and cross-votes findings. | [`workflows/`](workflows/) |
 
 Each folder's README has the install steps and the reasoning; everything
@@ -29,7 +30,8 @@ targets `~/.claude`. Run all install commands from the repo root.
 
 ## The flow in one paragraph
 
-The main session is an orchestrator: it plans against an ADR/spec, hands
+The main session is an orchestrator: it decides with you in an ADR (`/adr`),
+cuts the decisions into phases (`/spec`), runs them one at a time (`/implement`), hands
 implementation to agents (Geralt — backend, Lyutik — frontend), verifies
 results, and never burns its own context on writing code. The status line
 keeps the context % in view; at ~30% the work is handed off (`/handoff`) and a
