@@ -139,10 +139,10 @@ phase map table. Close with **After the phases** — PR, changelog, manual steps
 3. **Present to the user:** the phase map table plus a short list of the calls that are
    the session's own. The boundary: how to cut, in what order, how to verify — those are
    the spec's calls and belong on this list; what the product does or how it is built is
-   the ADR's, and a gap there goes back to `/adr`, never onto this list. Wait for «так».
+   the ADR's, and a gap there goes back to `/adr`, never onto this list. Wait for the user's explicit yes.
    Do not start the next step on silence.
 
-External review (Agatha/Arthur/Dash, `твікс`, precogs) only on the user's command.
+External review (Agatha/Arthur/Dash, `twix`, precogs) only on the user's command.
 Reviewers push toward runbooks and toward re-deciding — hold the line; verify BLOCKING
 claims against the files before applying.
 

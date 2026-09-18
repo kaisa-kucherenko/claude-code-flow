@@ -70,7 +70,7 @@ If the problem space is unfamiliar or has industry precedent worth studying:
 - Launch parallel research agents — the session's model when the research needs judgement, one step down when it is collection and summary; each saves results to its own file in the project root
 - After all agents finish, create a synthesis document that extracts cross-cutting patterns
 
-Research is expensive (time + tokens). Ask the user: "Тут є сенс поресерчити як інші це вирішують, чи одразу до рішень?" If the user already has context, skip to Phase 3.
+Research is expensive (time + tokens). Ask the user: "Worth researching how others solve this, or straight to the decisions?" If the user already has context, skip to Phase 3.
 
 ### Phase 3: Build the decision tree
 
@@ -100,7 +100,7 @@ dependency order is for the discussion; the two often differ, and the discussion
 
 **Flat numbering 1…N, given once.** No letters (1a/1b), no renumbering after a merge or a
 drop — a DROPPED decision keeps its number and its stub with the reason. Numbers are the
-reader's anchors; the moment they move, every earlier "→ 7" in the file and in her head is wrong.
+reader's anchors; the moment they move, every earlier "→ 7" in the file and in the reader's head is wrong.
 
 Create the living document with the "How it works" opener, the status table and ALL
 decisions as PENDING stubs:
@@ -122,7 +122,7 @@ Living document. Each decision is final unless a later decision forces us to rev
 
 ## 1. Decision title — brief description
 **Status:** PENDING
-**Answers:** which question of hers this closes, one line
+**Answers:** which question of the user's this closes, one line
 **Stands on:** — (or: 3, 5)
 
 ## 2. Another decision — brief description
@@ -149,13 +149,13 @@ X" card strip, not forced into the story. It is a **local HTML file next to the 
   Mermaid owns the geometry, so boxes cannot overlap and no screenshot check is needed —
   the session never hand-places boxes, arrows or SVG text
 - a scene diagram carries the scene's one idea (the hinge node highlighted with a
-  `classDef`), 3–7 nodes, labelled edges, full words — "Термін з плану" is a label,
-  "Терм. з плану" is a compression nobody asked for
-- drawing the diagrams is delegated to the Mermaid agent (Ariel) when one exists. She gets
-  the ADR file and the scene list — not a retelling of the mechanism; she reads and extracts
+  `classDef`), 3–7 nodes, labelled edges, full words — "Retention from plan" is a label,
+  "Ret. frm plan" is a compression nobody asked for
+- drawing the diagrams is delegated to the Mermaid agent (Ariel) when one exists. It gets
+  the ADR file and the scene list — not a retelling of the mechanism; it reads and extracts
   it herself, that is what the agent is for. The session checks the labels against the ADR
   before assembling the page
-- under every scene: decision chips ("Рішення 1 · 2 · 14"), "stands on" chips linking to the
+- under every scene: decision chips ("Decisions 1 · 2 · 14"), "stands on" chips linking to the
   scene where the dependency lives, and a collapsed "Why so" (`<details>`) — empty until the
   decision is fixated
 
@@ -163,9 +163,9 @@ Forms that were tried and rejected — do not offer them again: a mermaid graph 
 decisions as the whole-picture device (Mermaid inside a scene is fine; a graph of 16
 decisions is not); "all N decisions in one line" as a summary; a text-only "where we are"
 checkpoint message; an artifact with hand-laid flex/SVG diagrams (every regeneration broke
-the layout and cost a screenshot round). None of them let her see the whole at the end.
+the layout and cost a screenshot round). None of them let the user see the whole at the end.
 
-Present the tree AND the storyboard to the user. Ask: "Тут все що треба вирішити? Чи я щось пропустив?"
+Present the tree AND the storyboard to the user. Ask: "Is this everything we need to decide, or did I miss something?"
 
 ### Phase 4: Sequential discussion ("beads on a necklace")
 
@@ -180,7 +180,7 @@ tree in memory, so a bare "7" means nothing to them:
    fact is cheap to get (an `EXPLAIN` on prod beats a debate)
 4. A table of options with concrete, non-technical minuses — one message, one decision;
    explain any jargon the moment it appears
-5. Your recommendation with reasoning, then the explicit ask ("Так?") — one «так» fixates
+5. Your recommendation with reasoning, then the explicit ask ("Yes?") — one explicit yes fixates
    exactly one decision
 
 The recommendation is mandatory: a menu without an opinion is useless.
@@ -207,17 +207,17 @@ When consensus is reached, update the document:
 
 Keep fixated decisions concise but complete. Someone reading only the DECIDED sections should understand the full architecture.
 
-After every «так», three more writes, same turn: the status table row flips; "How it works"
+After every yes, three more writes, same turn: the status table row flips; "How it works"
 is rewritten if the mechanism changed; the storyboard scene that holds this decision gets
 its "Why so" filled — a Y-statement ("In the context of …, we chose …, so that …") plus one
 "Rejected: …" line per alternative — and the storyboard file is rewritten.
-The story grows with the decisions, so at decision 14 she still sees the whole of it.
+The story grows with the decisions, so at decision 14 the user still sees the whole of it.
 
 Important: after fixating, check if this decision affects any already-decided sections.
 If yes — do NOT silently rewrite them as DECIDED. Mark each affected one PROPOSED and
 re-present it in the same format above; the user re-approves each one explicitly. A
 pivot (e.g. a new mechanism replacing the issue's plan) can touch several earlier
-decisions — walk through all of them. One "так" fixates exactly one decision.
+decisions — walk through all of them. One yes fixates exactly one decision.
 Cross-reference consistency is critical.
 
 ### Phase 4.5: Split if needed (skip for small features)
@@ -274,10 +274,10 @@ Ask the user which reviewer fits this ADR (Agatha/Opus deep, Arthur/Codex, Dash/
 - Valid → fix or add to the document
 - Invalid (based on context the reviewer doesn't have) → explain why to user, skip
 
-**Report review results to her in plain words, one line per finding, in four buckets:**
-"знайдено / фікшу сам / потребує твого «так» / відхиляю і чому". No reviewer jargon, no
+**Report review results to the user in plain words, one line per finding, in four buckets:**
+"found / fixing myself / needs your yes / rejected and why". No reviewer jargon, no
 severity codes as the headline — the bucket IS the headline. Only the third bucket costs
-her attention; make it short and concrete.
+the user's attention; make it short and concrete.
 
 When a review round changes a decision, move the brief's document pointers (which file,
 which sections) to the new state before the next round — a stale pointer re-finds what was
@@ -302,11 +302,11 @@ records that the ADR is closed, where it lives, and that `/spec` is next — not
 
 ## Anti-patterns
 
-- Starting to code before decisions are made ("я по ходу розберусь")
+- Starting to code before decisions are made ("I'll figure it out as I go")
 - Discussing all decisions simultaneously instead of sequentially
-- Making decisions without writing them down ("ми ж це обговорили")
+- Making decisions without writing them down ("but we discussed it")
 - Referencing "decision 7" without a stub → user has no idea what you mean
-- Skipping external review ("і так нормально")
+- Skipping external review ("it's fine as is")
 - Over-researching a simple feature that needs 3 decisions, not 3 hours of research
 - Letters in numbering (1a/1b) or renumbering after a merge — anchors must not move
 - A stub that hides two choices; a "where is this decided? — in 7" jump with no stub to land on
