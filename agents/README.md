@@ -37,9 +37,9 @@ Naturally.
 | [`arthur.md`](arthur.md) | Wrapper around the **Codex CLI** (requires it installed) — the cross-vendor second opinion. Different model families genuinely find different bugs in the same code. |
 | [`dash.md`](dash.md) | The fast, sharp third lens (Claude Sonnet) — diff-first, straight at what breaks. |
 
-The three prompt files are deliberately different in shape — Agatha is written
-as an identity ("what meticulousness means to you"), Dash as a terse process,
-Arthur as a CLI protocol — because depth, speed, and wrapping are different
+The three prompt files are deliberately different in shape — Agatha as a set
+of lenses to read the code through, Dash as a terse process, Arthur as a CLI
+protocol — because depth, speed, and wrapping are different
 jobs. What IS uniform is what must merge: a shared severity scale
 (BLOCKING / IMPORTANT / NIT, exact labels) and two rules — a caller convention,
 with the reviewer prompts written to enforce it even when the caller slips:

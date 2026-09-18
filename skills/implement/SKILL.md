@@ -141,7 +141,7 @@ project's own start command (from its `CLAUDE.md`):
   `setsid bash -c 'echo $$ > <scratchpad>/stack.pid; exec <start command>' > <scratchpad>/stack.log 2>&1 < /dev/null &`
   Wait for the project's "started" line in the log, then hit its health endpoint.
 - Stop = SIGINT to the whole group, what an IDE's Stop button does: `kill -INT -- -$(cat <scratchpad>/stack.pid)`,
-  then the same `ss -ltn` check must print nothing. The frames server on :8765 stays up until the phase report is read — stop it only when the user is done with the frames or the session ends. Report "stack down, ports free" with that empty output. Never `kill <pid of a bash -c wrapper>` (the Bash tool's
+  then the same `ss -ltn` check must print nothing. (The frames server from the visual-phase rule below is not part of the stack: it stays up until the user has read the phase report.) Report "stack down, ports free" with that empty output. Never `kill <pid of a bash -c wrapper>` (the Bash tool's
   wrapper has no trap and leaves every child service running) and never
   `pkill -f '<pattern>'` (matches the session's own shell, exit 144).
 

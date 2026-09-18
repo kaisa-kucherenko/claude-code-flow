@@ -16,7 +16,7 @@ A = A || {}
 const scope = A.scope || 'uncommitted working-tree changes (git diff HEAD)'
 // Unknown arg keys are NOT silently dropped — they flow into the context block,
 // so callers can pass focus/known_candidates/triage_policy/etc. freely.
-const KNOWN_KEYS = ['scope', 'context', 'files', 'spec', 'rounds', 'crosscritique', 'debate']
+const KNOWN_KEYS = ['scope', 'context', 'files', 'spec', 'rounds', 'crosscritique', 'debate', 'codex_effort']
 const extraCtx = Object.entries(A)
   .filter(([k]) => !KNOWN_KEYS.includes(k))
   .map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)
@@ -54,9 +54,14 @@ const dashLimits = `
 - Read the diff and open surrounding files only where a specific finding needs the context — do not tour the tree.
 - Stay under ~25 tool calls.`
 
+// Codex reasoning effort (NOT the Arthur wrapper's own effort) for THIS run only — args { codex_effort: 'high' }.
+// Unset = the ~/.codex/config.toml default. arthur.md reads this line and adds
+// `-c model_reasoning_effort=...` to its codex exec call; config.toml is never edited.
+const arthurEffort = A.codex_effort ? `\n\nARTHUR ONLY: codex effort: ${A.codex_effort} (add -c model_reasoning_effort="${A.codex_effort}" to codex exec for this run).` : ''
+
 const [agatha, arthur, dash] = await parallel([
   () => agent(brief, { agentType: 'agatha', label: 'Agatha (Claude)', phase: 'Review' }),
-  () => agent(brief, { agentType: 'arthur', label: 'Arthur (Codex)', phase: 'Review' }),
+  () => agent(brief + arthurEffort, { agentType: 'arthur', label: 'Arthur (Codex)', phase: 'Review' }),
   () => agent(brief + dashLimits, { agentType: 'dash', label: 'Dash (Sonnet)', phase: 'Review' }),
 ])
 
@@ -95,7 +100,7 @@ ${text(round1[peers[1]], personaName[peers[1]])}`
 
   const [agatha2, arthur2, dash2] = await parallel([
     () => agent(crossBrief('agatha'), { agentType: 'agatha', label: 'Agatha (cross-exam)', phase: 'Cross-examine' }),
-    () => agent(crossBrief('arthur'), { agentType: 'arthur', label: 'Arthur (cross-exam)', phase: 'Cross-examine' }),
+    () => agent(crossBrief('arthur') + arthurEffort, { agentType: 'arthur', label: 'Arthur (cross-exam)', phase: 'Cross-examine' }),
     () => agent(crossBrief('dash') + dashLimits, { agentType: 'dash', label: 'Dash (cross-exam)', phase: 'Cross-examine' }),
   ])
   final = { agatha: agatha2, arthur: arthur2, dash: dash2 }

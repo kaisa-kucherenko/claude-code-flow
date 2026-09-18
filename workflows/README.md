@@ -38,4 +38,6 @@ cp workflows/precogs.js ~/.claude/workflows/
 
 Then ask the session to run it: "run the precogs workflow on this diff" — or
 pass args for scope/spec/debate, e.g. `{ scope: "PR #42 vs master", spec:
-"docs/spec.md", rounds: 2 }`.
+"docs/spec.md", rounds: 2 }`. `codex_effort: "high"` raises Codex's reasoning
+effort for Arthur on this run only (`none` … `max`); your `~/.codex/config.toml`
+stays untouched.

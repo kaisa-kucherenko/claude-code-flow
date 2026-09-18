@@ -12,7 +12,7 @@ component); the account block of phase 5 cannot reach it from there.
 - Schedulers move with the state and become module-level: they start on the first
   subscription and are never torn down for the page's lifetime, so subscriber count never
   changes their cadence. 5-min interval, 1s post-stream refresh, `visibilitychange` with 10s
-  throttle, the `stus:quota-refresh` event, the 30s→5min retry ladder on exhausted quota with
+  throttle, the `app:quota-refresh` event, the 30s→5min retry ladder on exhausted quota with
   an overdue reset, 15s timeout, latch to `null` after 3 consecutive failures; the next
   scheduled tick or a manual `refresh()` issues a new request and a success clears the
   latch. Behaviour is 1:1 with today — this phase changes the owner, not the semantics.
@@ -78,7 +78,7 @@ component); the account block of phase 5 cannot reach it from there.
 - `frontend/CLAUDE.md` names the new owner; the old paragraph is removed, not duplicated.
 - `npm test` green, 7 tests; no `jsdom` / `@testing-library` in `package.json`.
 
-**Verify.** Test data: the local stack with quota enabled (no `--no-quota`), one signed-in
+**Verify.** Test data: the local stack with quota enforcement enabled, one signed-in
 user with a chat that has ≥3 conversations.
 - Notices behave as before → `browser` 1280px light: send a message that crosses the warning
   threshold → the QUOTA_WARNING notice appears; after the stream ends the counter updates
