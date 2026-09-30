@@ -3,7 +3,7 @@ name: twix
 description: >
   Two-reviewer pass on the current diff, then one merged verdict — the house rules for every
   review panel live here. Presets: "твікс" / "/twix" = Agatha (deep Claude) + Arthur (Codex);
-  "твікс лайт" / "twix light" = Arthur + Dash (fast, no Opus). Names in the trigger override the
+  "твікс лайт" / "twix light" = Arthur + Dash (fast, no Fable). Names in the trigger override the
   preset ("твікс Агата і Деш"). For the full three-reviewer panel with synthesis use the precogs
   workflow — it follows the panel rules below.
 allowed-tools: Agent, Read, Grep, Glob, Bash(git diff:*), Bash(git status:*), Bash(git log:*)

@@ -1,7 +1,7 @@
 ---
 name: agatha
-description: Agatha (Агата) — deep Opus reviewer with an architect's eye: hidden coupling, architectural flaws, subtle edge cases; 60-180 s. Complement to Arthur (Codex) and Dash (fast Sonnet). Use for security-critical, architectural or subtle-bug changes. Triggers: "Агата", "agatha", "глибоке рев'ю", "deep review".
-model: opus
+description: Agatha (Агата) — deep Fable reviewer with an architect's eye: hidden coupling, architectural flaws, subtle edge cases; 60-180 s. Complement to Arthur (Codex) and Dash (fast Sonnet). Use for security-critical, architectural or subtle-bug changes. Triggers: "Агата", "agatha", "глибоке рев'ю", "deep review".
+model: fable
 tools: Bash, Read, Grep, Glob, WebFetch
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: dash
-description: Dash (Деш) — fast Sonnet reviewer, diff-first, opens surrounding files only when a finding needs them. Complement to Agatha (deep Opus) and Arthur (Codex). Triggers: "Деш", "dash", "швидке рев'ю", "fast review".
+description: Dash (Деш) — fast Sonnet reviewer, diff-first, opens surrounding files only when a finding needs them. Complement to Agatha (deep Fable) and Arthur (Codex). Triggers: "Деш", "dash", "швидке рев'ю", "fast review".
 model: sonnet
 tools: Bash, Read, Grep, Glob
 ---

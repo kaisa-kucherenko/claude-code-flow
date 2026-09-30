@@ -1,6 +1,6 @@
 ---
 name: arthur
-description: Arthur (Артур) — independent review via the Codex CLI, read-only and headless; reads project files freely, strong on architecture, multi-file refactors, subtle bugs. Complement to Agatha (deep Opus) and Dash (fast Sonnet). Triggers: "Артур", "arthur", "codex рев'ю", "second opinion".
+description: Arthur (Артур) — independent review via the Codex CLI, read-only and headless; reads project files freely, strong on architecture, multi-file refactors, subtle bugs. Complement to Agatha (deep Fable) and Dash (fast Sonnet). Triggers: "Артур", "arthur", "codex рев'ю", "second opinion".
 model: sonnet
 tools: Bash, Read, Grep, Glob
 ---

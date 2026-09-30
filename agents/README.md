@@ -33,7 +33,7 @@ Naturally.
 
 | Agent | Lens |
 |-------|------|
-| [`agatha.md`](agatha.md) | Deep architectural review (Claude Opus) — reads everything, pulls every thread. |
+| [`agatha.md`](agatha.md) | Deep architectural review (Claude Fable) — reads everything, pulls every thread. |
 | [`arthur.md`](arthur.md) | Wrapper around the **Codex CLI** (requires it installed) — the cross-vendor second opinion. Different model families genuinely find different bugs in the same code. |
 | [`dash.md`](dash.md) | The fast, sharp third lens (Claude Sonnet) — diff-first, straight at what breaks. |
 

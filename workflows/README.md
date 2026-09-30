@@ -3,7 +3,7 @@
 ## precogs.js — the review panel, orchestrated
 
 [`precogs.js`](precogs.js) runs the three reviewers from [`../agents/`](../agents/)
-— Agatha (Claude Opus), Arthur (Codex), Dash (Claude Sonnet) — **in parallel on
+— Agatha (Claude Fable), Arthur (Codex), Dash (Claude Sonnet) — **in parallel on
 the same change**, then a synthesis agent dedupes their findings and
 cross-votes them. Named after Minority Report: three precogs, one verdict.
 

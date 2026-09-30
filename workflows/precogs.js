@@ -1,6 +1,6 @@
 export const meta = {
   name: 'precogs',
-  description: 'Three-reviewer panel — Agatha (Claude Opus, deep), Arthur (Codex), Dash (Claude Sonnet, fast) review the same change in parallel, then a synthesis agent dedupes findings and cross-votes them',
+  description: 'Three-reviewer panel — Agatha (Claude Fable, deep), Arthur (Codex), Dash (Claude Sonnet, fast) review the same change in parallel, then a synthesis agent dedupes findings and cross-votes them',
   phases: [
     { title: 'Review', detail: 'Agatha + Arthur + Dash in parallel' },
     { title: 'Cross-examine', detail: 'debate mode only — each reviewer reconciles peers\' findings (skipped without debate)' },
@@ -108,7 +108,7 @@ ${text(round1[peers[1]], personaName[peers[1]])}`
 
 phase('Synthesize')
 
-const synthPrompt = `Three independent reviewers examined the SAME change. Different models and lenses (Claude Opus deep / Codex / Claude Sonnet fast) catch different classes of issue, and a single pass is unreliable — so cross-voting matters. Note: Agatha and Dash share the Claude lineage, so a finding both raise is less independent than one Arthur (Codex) also raises — weight cross-vendor agreement slightly higher.${rounds >= 2 ? '\nThese are their ROUND-2 positions: each has already seen the other two\'s round-1 findings and tagged them CONFIRMED / DISPUTED / CONCEDED / RETRACTED. Weight a DISPUTED finding lower and a multiply-CONFIRMED one higher; a RETRACTED finding is dead.' : ''}
+const synthPrompt = `Three independent reviewers examined the SAME change. Different models and lenses (Claude Fable deep / Codex / Claude Sonnet fast) catch different classes of issue, and a single pass is unreliable — so cross-voting matters. Note: Agatha and Dash share the Claude lineage, so a finding both raise is less independent than one Arthur (Codex) also raises — weight cross-vendor agreement slightly higher.${rounds >= 2 ? '\nThese are their ROUND-2 positions: each has already seen the other two\'s round-1 findings and tagged them CONFIRMED / DISPUTED / CONCEDED / RETRACTED. Weight a DISPUTED finding lower and a multiply-CONFIRMED one higher; a RETRACTED finding is dead.' : ''}
 
 Produce ONE synthesized report:
 - Dedupe findings by file:line + root issue (the same bug worded differently = one finding).
@@ -120,7 +120,7 @@ Produce ONE synthesized report:
 
 Do NOT invent findings or inflate severity. If all three say clean, the verdict is clean.
 
-=== AGATHA (Claude Opus, deep file-aware) ===
+=== AGATHA (Claude Fable, deep file-aware) ===
 ${text(final.agatha, 'Agatha')}
 
 === ARTHUR (Codex, file-aware CLI) ===

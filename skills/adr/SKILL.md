@@ -257,7 +257,7 @@ Wording, cross-references and formatting you fix yourself. Anything that changes
 
 **External review:**
 
-Ask the user which reviewer fits this ADR (Agatha/Opus deep, Arthur/Codex, Dash/Sonnet, or a panel — their judgement of scale and stakes), then run it yourself with the brief below. This skill stays neutral on the choice; it does not stay neutral on skipping it.
+Ask the user which reviewer fits this ADR (Agatha/Fable deep, Arthur/Codex, Dash/Sonnet, or a panel — their judgement of scale and stakes), then run it yourself with the brief below. This skill stays neutral on the choice; it does not stay neutral on skipping it.
 
 **What the reviewer should look for** (pass this brief as the prompt context — adapt phrasing to the chosen tool):
 1. Internal inconsistencies or contradictions between sections/files
