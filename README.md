@@ -22,7 +22,7 @@ yourself.
 | Development-cycle skills | `adr` → `spec` → `implement` → `twix`: decide with an explicit yes each, cut into phases, run one phase per commit, review with a neutral panel. | [`skills/`](skills/) |
 | Handoff / pickup skills | Deliberate session switching instead of `/compact`: you decide what survives, the next session verifies it against reality. | [`skills/`](skills/) |
 | Status line | The context-% number that drives the whole workflow, with traffic-light thresholds (green <30%, yellow 30–39%, red at 40+). | [`statusline/`](statusline/) |
-| Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle), a diagram drawer (Ariel). | [`agents/`](agents/) |
+| Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle), a diagram drawer (Ariel), a test pair (Sam writes, Dean breaks) with a shared `pytest-quality` skill. | [`agents/`](agents/) |
 | Precogs workflow | Orchestrates the panel: three reviewers in parallel, then a synthesis that dedupes and cross-votes findings. | [`workflows/`](workflows/) |
 
 Each folder's README has the install steps and the reasoning; everything

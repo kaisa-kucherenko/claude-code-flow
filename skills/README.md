@@ -1,13 +1,14 @@
 # Skills
 
 Two groups: the development cycle from a task to a PR, and the session
-continuity that keeps that cycle alive across context windows.
+continuity that keeps that cycle alive across context windows. Plus one bar
+for tests.
 
 ## Install
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -r skills/adr skills/spec skills/implement skills/twix skills/handoff skills/pickup ~/.claude/skills/
+cp -r skills/adr skills/spec skills/implement skills/twix skills/handoff skills/pickup skills/pytest-quality ~/.claude/skills/
 ```
 
 `implement` runs your project's own commands. Its `CLAUDE.md` must name the
@@ -62,3 +63,20 @@ The design decisions that matter, both learned the hard way:
   wrong mental models must not be transplanted into a fresh head.
 - **Negative knowledge is first-class** — what was ruled out and WHY stops the
   next session from re-digging the same hole.
+
+## Test quality — `pytest-quality`
+
+[`pytest-quality/`](pytest-quality/SKILL.md) is the bar for pytest tests that
+can actually fail when the code is wrong: every test names the break it
+catches, expected values come from an independent oracle, mocks sit only at
+the external edge, nothing is written for count or coverage, and a mutation
+check shows a test can go red — in the head for every key test, for real on
+key branches, in a throwaway copy of the repo. Sam (writes) and Dean (reviews) preload it
+— see [`../agents/`](../agents/README.md); load it directly when a session
+writes or reviews Python tests itself.
+
+Project specifics stay out of the skill: put the run command, asyncio mode,
+the mock boundary, gitignored files the tests need and known traps in
+`.claude/testing.md` at the project root.
+Without that file the skill derives them from `pyproject.toml`, the nearest
+`conftest.py` and adjacent tests, and says the file is missing.

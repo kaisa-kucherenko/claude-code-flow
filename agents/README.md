@@ -11,8 +11,11 @@ implementation.
 
 ```bash
 mkdir -p ~/.claude/agents
-cp agents/{agatha,ariel,arthur,dash,geralt,gilfoyle,jobs,lauda,lyutik}.md ~/.claude/agents/
+cp agents/{agatha,ariel,arthur,dash,dean,geralt,gilfoyle,jobs,lauda,lyutik,sam}.md ~/.claude/agents/
 ```
+
+Sam and Dean preload the `pytest-quality` skill — install it too (see
+[`../skills/`](../skills/README.md)).
 
 Arthur additionally needs the [Codex CLI](https://github.com/openai/codex)
 installed and configured (`~/.codex/config.toml` picks the model); to run him
@@ -55,6 +58,30 @@ with the reviewer prompts written to enforce it even when the caller slips:
 The panel is orchestrated by [`../workflows/precogs.js`](../workflows/precogs.js)
 — parallel run, then a synthesis agent that dedupes and cross-votes the
 findings.
+
+## Tests — Sam writes, Dean breaks
+
+| Agent | Lane |
+|-------|------|
+| [`sam.md`](sam.md) | Writes pytest tests. Builds the test list from the contract (task, spec, docstring, callers) before reading the implementation, so the tests don't inherit its bugs as "expected". Every test names the break it catches; a mutation check (in his head for every key test, for real on key branches) proves it can fail. |
+| [`dean.md`](dean.md) | Reviews tests and never fixes them. Runs them, walks each down a review ladder, and backs a "this test can't fail" claim with a concrete wrong implementation that still passes — a real mutation in a throwaway repo copy when the argument isn't obvious. Precision over recall. |
+
+The problem they solve: when the session that wrote the code also writes the
+tests, the tests confirm its own bugs, and "covered by tests" often means a
+mock checking a mock. Mutation is the yardstick — break the code on purpose;
+a test that stays green is decoration.
+
+Two agents, not one with two modes, because tools are set per agent, not per
+mode: a reviewer with Edit/Write is one tool call away from "fixing" a test
+to green. Dean has no Edit/Write; he keeps Bash to run tests and mutations,
+so past that point the boundary is his prompt. Separate agents also keep each procedure out of the
+other's context and let model and effort differ. The bar itself lives in one
+place — both preload the [`pytest-quality`](../skills/pytest-quality/SKILL.md)
+skill through the `skills:` frontmatter field, which injects the full skill
+text at startup, so the brothers can't drift apart on the rules.
+
+Brief Sam with the contract, the target and the scope only. The session that
+wrote the code doesn't get to steer him toward its own idea of what's correct.
 
 ## Specialists — for questions a general session answers shallowly
 
