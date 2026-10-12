@@ -18,7 +18,17 @@ if [[ "$name" == "turn-done" ]] && command -v jq > /dev/null; then
     (( inflight > 0 )) && exit 0
 fi
 
-clip="${CLAUDE_PLUGIN_ROOT:-$(dirname "$0")/..}/sounds/$name.oga"
+root="${CLAUDE_PLUGIN_ROOT:-$(dirname "$0")/..}"
+# Another persona on duty (or none, after off) keeps this one quiet; no file
+# means nobody has chosen yet.
+active_file="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/personas/active"
+if [[ -f "$active_file" ]]; then
+    # The manifest's first "name" is the plugin's; read without jq so the gate holds everywhere
+    me=$(sed -n 's/^ *"name": *"\([^"]*\)".*/\1/p' "$root/.claude-plugin/plugin.json" | head -1)
+    [[ "$(< "$active_file")" == "$me" ]] || exit 0
+fi
+
+clip="$root/sounds/$name.oga"
 [[ -f "$clip" ]] || exit 0
 command -v paplay > /dev/null || exit 0
 paplay "$clip" 2> /dev/null &

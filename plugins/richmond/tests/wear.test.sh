@@ -42,7 +42,8 @@ check "on sets the plugin theme under the plugin's name" '.theme == "custom:rich
 check "on points the status lines at stable copies" \
   '(.statusLine.command | endswith("/personas/richmond/statusline.sh\u0027")) and (.subagentStatusLine.command | endswith("/personas/richmond/subagent-statusline.sh\u0027"))'
 check "on sets spinner verbs and tips" '(.spinnerVerbs.verbs | length) > 0 and (.spinnerTipsOverride.tipsFile | endswith("/personas/richmond/tips.json"))'
-check "on disables the other persona only" '.enabledPlugins == {"richmond@flow": true, "witcher@flow": false, "other@x": true}'
+check "on leaves every plugin enabled" '.enabledPlugins == {"richmond@flow": true, "witcher@flow": true, "other@x": true}'
+expect "on puts this persona on duty" '[[ "$(< "$tmp/cfg/personas/active")" == richmond ]]'
 expect "on copies the files the settings point at" '[[ -x "$tmp/cfg/personas/richmond/statusline.sh" && -f "$tmp/cfg/personas/richmond/tips.json" ]]'
 expect "on makes the terminal profile the default" 'grep -q "gsettings set org.gnome.Terminal.ProfilesList default aa2a6a69" "$calls"'
 
@@ -56,19 +57,20 @@ bash "$wear" off > /dev/null
 check "off restores the persona keys and drops the ones that were unset" \
   '.theme == "light" and .statusLine.command == "~/own-statusline.sh" and (has("spinnerVerbs") | not) and (has("subagentStatusLine") | not)'
 check "off keeps settings changed while the persona was on" '.model == "sonnet" and .permissions.allow == ["Bash(ls:*)"]'
-check "off disables every persona and leaves other plugins alone" '.enabledPlugins == {"richmond@flow": false, "witcher@flow": false, "other@x": true}'
+check "off leaves the plugins enabled" '.enabledPlugins == {"richmond@flow": true, "witcher@flow": true, "other@x": true}'
 expect "off restores the person's terminal profile" 'grep -q "default own-profile" "$calls"'
-expect "off removes its state" '[[ ! -e "$tmp/cfg/personas" ]]'
+expect "off keeps only the marker that no persona is on duty" '[[ "$(ls "$tmp/cfg/personas")" == active && "$(< "$tmp/cfg/personas/active")" == none ]]'
 
 before="$(cat "$cfg")"
 bash "$wear" on anfield > /dev/null 2>&1; code=$?
 expect "an unknown theme fails" '[[ $code -ne 0 ]]'
-expect "an unknown theme leaves settings untouched" '[[ "$(cat "$cfg")" == "$before" && ! -e "$tmp/cfg/personas" ]]'
+expect "an unknown theme leaves settings and the marker untouched" '[[ "$(cat "$cfg")" == "$before" && "$(< "$tmp/cfg/personas/active")" == none ]]'
 
 expect "off with nothing on is a no-op" 'bash "$wear" off > /dev/null && [[ "$(cat "$cfg")" == "$before" ]]'
 
+jq '.enabledPlugins["richmond@flow"] = false' "$cfg" > "$cfg.t" && mv "$cfg.t" "$cfg"
 bash "$wear" on > /dev/null
-check "on turns its own plugin back on after off disabled it" '.enabledPlugins["richmond@flow"] == true and .enabledPlugins["witcher@flow"] == false'
+check "on turns its own plugin back on" '.enabledPlugins["richmond@flow"] == true'
 bash "$wear" off > /dev/null
 
 rm "$cfg"

@@ -3,14 +3,50 @@ import { expect, mock, test } from 'claude-code/testing'
 const props = { hasSurvey: false, isWorking: false, maxRows: 6, bodyColumns: 160, scroll: { offset: 0, bodyRows: 5 }, view: {} }
 
 type T = { props: { bold?: boolean; color?: string } }
-async function mount($: any, on: any, usage: object) {
+async function mount($: any, on: any, usage: object, active?: string, marker = { active }) {
+  // Stands for the engine's own band, drawn when the plugin passes
+  on('ui.render', { component: 'AbovePrompt' }, ($: any, e: any) => $.ui.resolve(e).Text({ children: 'engine band' }))
+  on('env.get', (_$: any, e: any) => ({ value: e.name === 'HOME' ? '/home/fan' : undefined }))
+  on('fs.read', (_$: any, e: any) => {
+    if (marker.active === undefined || e.path !== '/home/fan/.claude/personas/active') throw new Error('ENOENT')
+    return { value: `${marker.active}\n` }
+  })
   on('session.usage', () => ({ value: { startedAt: 0, rateLimits: [], ...usage } }))
   on('command.register', (_$: any, e: any) => ({ value: { command: e.name } }))
   on('session.start', (_$: any, e: any) => ({ cwd: e.cwd }))
+  on('turn.complete', () => ({ text: '' }))
   mock.clock(on)
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
   return $.ui.mount({ plugin: 'richmond', surface: 'terminal', component: 'AbovePrompt', props })
 }
+
+const FULL = { context: { window: 200000, percent: 23 }, rateLimits: [{ kind: 'seven_day', percentUsed: 43 }] }
+
+test('the band shows when this persona is on duty', async ($, on) => {
+  const band = await mount($, on, FULL, 'richmond')
+  expect(await band.find({ text: /2-й тайм/ })).toBeDefined()
+})
+
+test('the band stays off while another persona is on duty', async ($, on) => {
+  const band = await mount($, on, FULL, 'witcher')
+  expect(await band.find({ text: /2-й тайм/ })).toBeUndefined()
+  expect(await band.find({ text: /engine band/ })).toBeDefined()
+})
+
+test('a switch made in another session hides the band once the turn completes', async ($, on) => {
+  const marker = { active: 'richmond' as string | undefined }
+  const band = await mount($, on, FULL, undefined, marker)
+  expect(await band.find({ text: /2-й тайм/ })).toBeDefined()
+  marker.active = 'witcher'
+  await ($ as any).turn.complete({ reason: 'answer', answer: 'ok' })
+  expect(await band.find({ text: /2-й тайм/ })).toBeUndefined()
+})
+
+test('the band stays off after the persona was taken off', async ($, on) => {
+  const band = await mount($, on, FULL, 'none')
+  expect(await band.find({ text: /2-й тайм/ })).toBeUndefined()
+  expect(await band.find({ text: /engine band/ })).toBeDefined()
+})
 
 test('the band draws the match clock, the balls and the sign from the session usage', async ($, on) => {
   const band = await mount($, on, {

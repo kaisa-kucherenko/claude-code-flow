@@ -2,16 +2,19 @@
   "modules": ["./register.tsx"],
   "hooks": {
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh turn-done", "timeout": 5, "async": true }] }
+      { "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh turn-done", "timeout": 10, "async": true }] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh needs-you", "timeout": 10, "async": true }] }
+    ],
+    "Elicitation": [
+      { "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh needs-you", "timeout": 10, "async": true }] }
     ],
     "Notification": [
       {
-        "matcher": "permission_prompt|elicitation_dialog|elicitation_url_dialog|agent_needs_input",
-        "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh needs-you", "timeout": 5, "async": true }]
+        "matcher": "agent_needs_input",
+        "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh needs-you", "timeout": 10, "async": true }]
       }
-    ],
-    "Elicitation": [
-      { "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sound.sh needs-you", "timeout": 5, "async": true }] }
     ]
   }
 }

@@ -39,12 +39,19 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 | Part | Comes with | What it shows |
 |------|-----------|---------------|
 | HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 % → penalties from 40 %). Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
-| Sounds | the plugin | Roy's whistle when an answer is ready, Roy swearing when Claude is waiting for you (a permission prompt or a question). `CLAUDE_SOUND=off` mutes both. |
+| Sounds | the plugin | Roy's whistle when an answer is ready, Roy swearing the moment Claude asks for a permission or a question. `CLAUDE_SOUND=off` mutes both. |
 | Themes | the plugin | Nelson Road and Diamond Dogs, listed in `/theme`. |
 | Spinner verbs and tips | `/richmond` | 60 verbs and 95 tips in the characters' voices. |
 | Status line | `/richmond` | `⚑ project  ВДОМА · main  [model \| effort]`. A working branch is an away game, and its score is commits ahead : behind. |
 | Subagent panel | `/richmond` | Agents as the squad and staff: Explore is the scout, Plan is the coach at the whiteboard. |
 | Terminal profile | `/richmond`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
+
+## Switching personas
+
+The marketplace also has [`witcher`](../witcher/). Install both and switch with
+one command and a restart: `/witcher` puts the Witcher on duty, `/richmond`
+brings Richmond back. Until you pick one, both play their sounds and one HUD
+covers the other.
 
 ## What `/richmond` changes, and how to undo it
 
@@ -53,14 +60,16 @@ in your `~/.claude/settings.json`. So `/richmond` runs `scripts/wear.sh`, which
 writes them:
 
 - `theme`, `spinnerVerbs`, `spinnerTipsOverride`, `statusLine`, `subagentStatusLine`;
-- the AFC Richmond and Witcher persona plugins in `enabledPlugins` (only one persona at a time);
+- `~/.claude/personas/active`, which names the persona on duty: with several
+  persona plugins installed, only that one shows its HUD and plays sounds;
 - the default GNOME Terminal profile.
 
 The first run saves the previous values of exactly those keys to
 `~/.claude/personas/backup.json`. **`/richmond off`** puts them back and
-disables the persona plugins. Run it before `claude plugin uninstall`, or
-the status lines keep running from their copies. Everything else in your settings stays as it is,
-including whatever you changed while the persona was on. The status line
+silences the HUD and sounds of every persona plugin; they stay installed, and
+`/richmond` puts the persona back on. Run it before `claude plugin uninstall`,
+or the status lines keep running from their copies. Everything else in your
+settings stays as it is, including whatever you changed while the persona was on. The status line
 scripts are copied to `~/.claude/personas/` because the plugin's own folder
 changes path with every update.
 
@@ -70,6 +79,7 @@ changes path with every update.
 claude plugin validate plugins/richmond
 claude plugin test plugins/richmond        # the HUD and the /richmond command
 bash plugins/richmond/tests/wear.test.sh   # wear.sh against a throwaway config
+bash plugins/richmond/tests/sound.test.sh  # which persona gets to play
 ```
 
 ## Rights

@@ -82,6 +82,22 @@ async function refreshUsage($: Dollar) {
   await update($, usage, () => next)
 }
 
+// Several persona plugins can sit side by side; personas/active names the one
+// on duty and the others keep quiet. No file means nobody has chosen yet, so a
+// lone plugin works straight after install.
+async function isOnDuty($: Dollar): Promise<boolean> {
+  try {
+    const dir = (await $.env.get('CLAUDE_CONFIG_DIR')) ?? `${await $.env.get('HOME')}/.claude`
+    const active = String(await $.fs.read(`${dir}/personas/active`)).trim()
+    return active === 'richmond'
+  } catch {
+    return true
+  }
+}
+
+// Unknown until first asked: a default either way would flash the wrong band.
+let onDuty: boolean | undefined
+
 // Wearing the persona rewrites the person's own settings, so it is a command
 // they run, never a side effect of installing the plugin. wear.sh owns the
 // list of themes and says what it changed.
@@ -100,24 +116,33 @@ export const register: Register = on => {
       description: 'Вдягнути персону Річмонд: тема, спінер, statusline, профіль терміналу',
       argumentHint: '[nelson-road | diamond-dogs | off]',
     })
+    onDuty = await isOnDuty($)
     await refreshUsage($)
     return next(e)
   })
 
-  on('command.run', { command: 'richmond' }, async ($, e) => ({ text: await wear($, e.args) }))
+  on('command.run', { command: 'richmond' }, async ($, e) => {
+    const text = await wear($, e.args)
+    onDuty = await isOnDuty($)
+    return { text }
+  })
 
+  // Another session may have switched personas: re-read the marker as usage refreshes
   on('session.measure', async ($, e, next) => {
+    onDuty = await isOnDuty($)
     await refreshUsage($)
     return next(e)
   })
 
   on('turn.complete', async ($, e, next) => {
+    onDuty = await isOnDuty($)
     await refreshUsage($)
     return next(e)
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    if (e.props.hasSurvey) return next(e)
+    onDuty ??= await isOnDuty($)
+    if (e.props.hasSurvey || !onDuty) return next(e)
 
     const u = await read($, usage)
     const { Box, Text } = $.ui.resolve(e)
