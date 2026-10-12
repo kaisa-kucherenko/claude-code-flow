@@ -9,6 +9,12 @@
       "source": "./plugins/richmond",
       "description": "AFC Richmond persona: match HUD, Roy Kent sounds, Nelson Road themes",
       "category": "personas"
+    },
+    {
+      "name": "witcher",
+      "source": "./plugins/witcher",
+      "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD, game sounds, Corvo Bianco and Kaer Morhen themes",
+      "category": "personas"
     }
   ]
 }

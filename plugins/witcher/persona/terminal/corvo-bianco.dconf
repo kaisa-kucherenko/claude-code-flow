@@ -1,0 +1,14 @@
+[/]
+audible-bell=false
+background-color='#211C18'
+bold-color='#C2A064'
+bold-color-same-as-fg=false
+bold-is-bright=true
+cursor-background-color='#D0AD70'
+cursor-colors-set=true
+cursor-foreground-color='#211C18'
+cursor-shape='ibeam'
+foreground-color='#B9AD96'
+palette=['#211C18', '#BC655B', '#8D9B67', '#BCA05D', '#7C9BAA', '#A087A8', '#91AAA2', '#B9AD96', '#827464', '#CC7B6E', '#A2B17B', '#CFB578', '#95B2BF', '#B49ABD', '#AAC0B5', '#CEC1A9']
+use-theme-colors=false
+visible-name='Witcher Corvo Bianco'

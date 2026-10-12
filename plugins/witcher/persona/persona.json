@@ -1,0 +1,9 @@
+{
+  "wornMessage": "Відьмак на шляху",
+  "tipsLabel": "Біля вогнища",
+  "defaultTheme": "corvo-bianco",
+  "themes": {
+    "corvo-bianco": { "terminalProfile": "5509d4d0-8cf6-42e3-a58d-4716bd269815" },
+    "kaer-morhen": { "terminalProfile": "73a348c1-5f38-4fa9-a5b1-d21d56d9ef89" }
+  }
+}

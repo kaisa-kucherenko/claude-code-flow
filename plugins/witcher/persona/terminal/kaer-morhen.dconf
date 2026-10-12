@@ -1,0 +1,14 @@
+[/]
+audible-bell=false
+background-color='#1C2226'
+bold-color='#BEA16A'
+bold-color-same-as-fg=false
+bold-is-bright=true
+cursor-background-color='#CCB77D'
+cursor-colors-set=true
+cursor-foreground-color='#1C2226'
+cursor-shape='ibeam'
+foreground-color='#AFB7B8'
+palette=['#1C2226', '#BA6468', '#829C83', '#BBA264', '#759DB3', '#9B8EAF', '#84A8AB', '#AFB7B8', '#74838C', '#CD7C80', '#9BB498', '#CEBA80', '#91B6CA', '#B0A1C5', '#A0C0C1', '#C5CDCD']
+use-theme-colors=false
+visible-name='Witcher Kaer Morhen'

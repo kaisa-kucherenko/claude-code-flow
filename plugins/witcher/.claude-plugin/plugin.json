@@ -1,0 +1,8 @@
+{
+  "name": "witcher",
+  "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD above the prompt, game sounds, Corvo Bianco and Kaer Morhen themes, campfire spinner and status lines",
+  "author": { "name": "Kateryna Kucherenko" },
+  "homepage": "https://github.com/kaisa-kucherenko/claude-code-flow",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
