@@ -83,20 +83,33 @@ async function refreshUsage($: Dollar) {
 }
 
 // Several persona plugins can sit side by side; personas/active names the one
-// on duty and the others keep quiet. No file means nobody has chosen yet, so a
-// lone plugin works straight after install.
-async function isOnDuty($: Dollar): Promise<boolean> {
+// on duty and the others keep quiet. Undefined when the marker can't be read:
+// at session start that means nobody has chosen yet, so a lone plugin works
+// straight after install; mid-session it is a switch in progress.
+async function isOnDuty($: Dollar): Promise<boolean | undefined> {
   try {
     const dir = (await $.env.get('CLAUDE_CONFIG_DIR')) ?? `${await $.env.get('HOME')}/.claude`
     const active = String(await $.fs.read(`${dir}/personas/active`)).trim()
     return active === 'richmond'
   } catch {
-    return true
+    return undefined
   }
 }
 
 // Unknown until first asked: a default either way would flash the wrong band.
 let onDuty: boolean | undefined
+let stopWatching: (() => void) | undefined
+
+// The switch can come from another plugin's command or another session, and
+// neither can reach this module, so it polls the marker and redraws on change.
+const DUTY_POLL_MS = 3000
+
+async function recheckDuty($: Dollar) {
+  const now = await isOnDuty($)
+  if (now === undefined || now === onDuty) return
+  onDuty = now
+  $.ui.invalidate('ui.render')
+}
 
 // Wearing the persona rewrites the person's own settings, so it is a command
 // they run, never a side effect of installing the plugin. wear.sh owns the
@@ -106,7 +119,7 @@ async function wear($: Dollar, args: string): Promise<string> {
   const argv = ['bash', `${$.plugin.root}/scripts/wear.sh`, ...(arg === 'off' ? ['off'] : ['on', ...(arg ? [arg] : [])])]
   const r = await $.process.run(argv).catch((err: unknown) => ({ exitCode: -1, stdout: '', stderr: String(err) }))
   if (r.exitCode !== 0) return `Не вийшло: ${r.stderr.trim()}`
-  return `${r.stdout.trim()}\nПерезапусти Claude Code (/exit, потім claude -c), щоб зміни підхопились.`
+  return `${r.stdout.trim()}\nHUD, звуки і statusline вже перемкнулись. Перезапусти Claude Code (/exit, потім claude -c), щоб підхопились тема і спінер.`
 }
 
 export const register: Register = on => {
@@ -116,32 +129,32 @@ export const register: Register = on => {
       description: 'Вдягнути персону Річмонд: тема, спінер, statusline, профіль терміналу',
       argumentHint: '[nelson-road | diamond-dogs | off]',
     })
-    onDuty = await isOnDuty($)
+    onDuty = (await isOnDuty($)) ?? true
+    // Each session start re-arms the poll with its own `$`
+    stopWatching?.()
+    stopWatching = $.clock.every(DUTY_POLL_MS, () => void recheckDuty($)).cancel
     await refreshUsage($)
     return next(e)
   })
 
   on('command.run', { command: 'richmond' }, async ($, e) => {
     const text = await wear($, e.args)
-    onDuty = await isOnDuty($)
+    await recheckDuty($)
     return { text }
   })
 
-  // Another session may have switched personas: re-read the marker as usage refreshes
   on('session.measure', async ($, e, next) => {
-    onDuty = await isOnDuty($)
     await refreshUsage($)
     return next(e)
   })
 
   on('turn.complete', async ($, e, next) => {
-    onDuty = await isOnDuty($)
     await refreshUsage($)
     return next(e)
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    onDuty ??= await isOnDuty($)
+    onDuty ??= (await isOnDuty($)) ?? true
     if (e.props.hasSurvey || !onDuty) return next(e)
 
     const u = await read($, usage)

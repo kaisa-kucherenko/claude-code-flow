@@ -20,6 +20,9 @@ state="$claude_dir/personas"
 backup="$state/backup.json"
 KEYS='["theme", "spinnerVerbs", "spinnerTipsOverride", "statusLine", "subagentStatusLine"]'
 
+# The HUD mods poll the marker, so it is replaced whole, never seen half-written or missing
+set_active() { echo "$1" > "$state/active.tmp" && mv "$state/active.tmp" "$state/active"; }
+
 write_cfg() {
   local tmp; tmp="$(mktemp "$cfg.XXXXXX")" || return 1
   if jq "$@" "$cfg" > "$tmp"; then mv "$tmp" "$cfg"; else rm -f "$tmp"; return 1; fi
@@ -71,7 +74,7 @@ on)
       else . end'
   # Another persona's copies go only once the settings no longer point at them
   find "$state" -mindepth 1 -maxdepth 1 -type d ! -name "$persona" -exec rm -rf {} +
-  echo "$persona" > "$state/active"
+  set_active "$persona"
   echo "$(jq -r .wornMessage "$meta"): тема $theme, спінер, підказки, statusline, панель субагентів."
 
   if has_gnome_terminal; then
@@ -97,9 +100,8 @@ off)
       gsettings set org.gnome.Terminal.ProfilesList default "$term_default"
     fi
   fi
-  rm -rf "$state"
-  mkdir -p "$state"
-  echo none > "$state/active"
+  set_active none
+  find "$state" -mindepth 1 -maxdepth 1 ! -name active ! -name .lock -exec rm -rf {} +
   if [[ "$worn" == yes ]]; then
     echo "Персону знято: налаштування повернуто, HUD і звуки персон вимкнено."
   else

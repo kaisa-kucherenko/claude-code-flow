@@ -50,9 +50,10 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the Path.
 ## Switching personas
 
 The marketplace also has [`richmond`](../richmond/). Install both and switch with
-one command and a restart: `/richmond` puts AFC Richmond on duty, `/witcher`
-brings the Witcher back. Until you pick one, both play their sounds and one HUD
-covers the other.
+one command: `/richmond` puts AFC Richmond on duty, `/witcher` brings the
+Witcher back. The HUD, sounds and status line follow within seconds, in every
+open session; the theme and spinner need a restart. Until you pick one, both
+play their sounds and one HUD covers the other.
 
 ## What `/witcher` changes, and how to undo it
 

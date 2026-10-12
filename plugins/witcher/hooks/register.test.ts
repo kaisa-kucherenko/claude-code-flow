@@ -125,19 +125,21 @@ test('a failed wear.sh shows its stderr instead of a restart hint', async ($, on
   expect(text).not.toMatch(/Перезапусти/)
 })
 
-async function mountOnDuty($: any, on: any, active: string, marker = { active }) {
+// The mocked clock of the last mount, so a test can move time
+let clock: any
+
+async function mountOnDuty($: any, on: any, active: string, marker: { active: string | undefined } = { active }) {
   // Stands for the engine's own band, drawn when the plugin passes
   on('ui.render', { component: 'AbovePrompt' }, ($: any, e: any) => $.ui.resolve(e).Text({ children: 'engine band' }))
   on('env.get', (_$: any, e: any) => ({ value: e.name === 'HOME' ? '/home/fan' : undefined }))
   on('fs.read', (_$: any, e: any) => {
-    if (e.path !== '/home/fan/.claude/personas/active') throw new Error('ENOENT')
+    if (marker.active === undefined || e.path !== '/home/fan/.claude/personas/active') throw new Error('ENOENT')
     return { value: `${marker.active}\n` }
   })
   on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000, percent: 12 }, rateLimits: [] } }))
   on('command.register', (_$: any, e: any) => ({ value: { command: e.name } }))
   on('session.start', (_$: any, e: any) => ({ cwd: e.cwd }))
-  on('turn.complete', () => ({ text: '' }))
-  mock.clock(on)
+  clock = mock.clock(on)
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
   return $.ui.mount({
     plugin: 'witcher', surface: 'terminal', component: 'AbovePrompt',
@@ -156,12 +158,22 @@ test('the band stays off while another persona is on duty', async ($, on) => {
   expect(await band.find({ text: /engine band/ })).toBeDefined()
 })
 
-test('a switch made in another session hides the band once the turn completes', async ($, on) => {
+test('a switch made elsewhere hides the band within a few seconds, no restart', async ($, on) => {
   const marker = { active: 'witcher' }
   const band = await mountOnDuty($, on, 'witcher', marker)
   expect(await band.find({ text: /Токсичність/ })).toBeDefined()
   marker.active = 'richmond'
-  await ($ as any).turn.complete({ reason: 'answer', answer: 'ok' })
+  await clock.advance(3000)
+  expect(await band.find({ text: /Токсичність/ })).toBeUndefined()
+  expect(await band.find({ text: /engine band/ })).toBeDefined()
+})
+
+test('a marker that cannot be read mid-switch does not flash an off-duty band', async ($, on) => {
+  const marker = { active: 'richmond' as string | undefined }
+  const band = await mountOnDuty($, on, 'richmond', marker)
+  expect(await band.find({ text: /Токсичність/ })).toBeUndefined()
+  marker.active = undefined
+  await clock.advance(3000)
   expect(await band.find({ text: /Токсичність/ })).toBeUndefined()
 })
 
