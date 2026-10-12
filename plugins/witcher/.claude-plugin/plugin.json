@@ -1,8 +1,19 @@
 {
   "name": "witcher",
   "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD above the prompt, game sounds, Corvo Bianco and Kaer Morhen themes, campfire spinner and status lines",
-  "author": { "name": "Kateryna Kucherenko" },
+  "author": {
+    "name": "Kateryna Kucherenko"
+  },
   "homepage": "https://github.com/kaisa-kucherenko/claude-code-flow",
   "license": "MIT",
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "spinnerSeconds": {
+      "type": "number",
+      "title": "Spinner verb, seconds",
+      "description": "How often the spinner moves to the next verb while a turn runs",
+      "default": 30,
+      "min": 10
+    }
+  }
 }

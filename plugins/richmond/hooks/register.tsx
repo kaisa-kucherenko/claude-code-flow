@@ -111,18 +111,63 @@ async function recheckDuty($: Dollar) {
   $.ui.invalidate('ui.render')
 }
 
+// The engine samples the spinner word from the verbs it read at session start,
+// so a persona put on mid-session would keep the previous one's words; on duty,
+// this plugin swaps in its own.
+let verbs: readonly string[] = []
+
+async function loadVerbs($: Dollar) {
+  try {
+    verbs = JSON.parse(String(await $.fs.read(`${$.plugin.root}/persona/verbs.json`))).verbs ?? []
+  } catch {
+    verbs = []
+  }
+}
+
+// The engine samples its word once per turn, so the verb starts from it (or
+// from a hash of a word that isn't this persona's) and moves `step` verbs on,
+// one step per `spinnerSeconds`: a long turn doesn't sit on one line, and
+// redraws within a step keep the same verb.
+export function ownVerb(sampled: string, own: readonly string[], step = 0): string {
+  if (own.length === 0) return sampled
+  let start = own.indexOf(sampled)
+  if (start < 0) {
+    let h = 0
+    for (const ch of sampled) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+    start = h % own.length
+  }
+  return own[(start + step) % own.length]!
+}
+
+// When each sampled word was first drawn: the main spinner and each agent's
+// carry their own word, so each counts its steps from its own start.
+const firstSeen = new Map<string, number>()
+
+async function stepsSince($: Dollar, word: string, stepMs: number): Promise<number> {
+  const now = await $.clock.now()
+  if (firstSeen.size > 64) firstSeen.clear()
+  const start = firstSeen.get(word) ?? now
+  firstSeen.set(word, start)
+  return Math.floor((now - start) / stepMs)
+}
+
+// Redraws often enough that a step lands within a few seconds of falling due
+const SPINNER_TICK_MS = 5000
+
 // Wearing the persona rewrites the person's own settings, so it is a command
 // they run, never a side effect of installing the plugin. wear.sh owns the
-// list of themes and says what it changed.
+// list of themes and says what changed and where it shows up.
 async function wear($: Dollar, args: string): Promise<string> {
   const arg = args.trim()
   const argv = ['bash', `${$.plugin.root}/scripts/wear.sh`, ...(arg === 'off' ? ['off'] : ['on', ...(arg ? [arg] : [])])]
   const r = await $.process.run(argv).catch((err: unknown) => ({ exitCode: -1, stdout: '', stderr: String(err) }))
   if (r.exitCode !== 0) return `Failed: ${r.stderr.trim()}`
-  return `${r.stdout.trim()}\nThe HUD, sounds and status line have already switched. Restart Claude Code (/exit, then claude -c) to pick up the theme and spinner.`
+  return r.stdout.trim()
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  const stepMs = Math.max(10, Number(options.spinnerSeconds) || 30) * 1000
+
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'richmond',
@@ -132,7 +177,15 @@ export const register: Register = on => {
     onDuty = (await isOnDuty($)) ?? true
     // Each session start re-arms the poll with its own `$`
     stopWatching?.()
-    stopWatching = $.clock.every(DUTY_POLL_MS, () => void recheckDuty($)).cancel
+    const duty = $.clock.every(DUTY_POLL_MS, () => void recheckDuty($))
+    const tick = $.clock.every(SPINNER_TICK_MS, () => {
+      if (onDuty) $.ui.invalidate('ui.render')
+    })
+    stopWatching = () => {
+      duty.cancel()
+      tick.cancel()
+    }
+    await loadVerbs($)
     await refreshUsage($)
     return next(e)
   })
@@ -151,6 +204,14 @@ export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
     await refreshUsage($)
     return next(e)
+  })
+
+  on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
+    // A message (compacting, a hook running) says what is happening, and on the
+    // desktop the word names the step being done; both stay as they are
+    if (!onDuty || e.surface !== 'terminal' || e.props.message !== null) return next(e)
+    const step = await stepsSince($, e.props.word, stepMs)
+    return next({ ...e, props: { ...e.props, word: ownVerb(e.props.word, verbs, step) } })
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {

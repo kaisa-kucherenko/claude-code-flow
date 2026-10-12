@@ -42,23 +42,25 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the Path.
 | HUD above the prompt | the plugin | Toxicity is the context % and carries a mark at 30 %, the point to hand the session off. Stamina is the 5-hour limit and vitality the 7-day limit, both draining like the game's bars. |
 | Sounds | the plugin | «You learned something» when an answer is ready, «Something to think about» the moment Claude asks for a permission or a question. `CLAUDE_SOUND=off` mutes both. |
 | Themes | the plugin | Corvo Bianco and Kaer Morhen, listed in `/theme`. |
-| Spinner verbs and tips | `/witcher` | 55 verbs and 90 tips: lines from the books and in the characters' voices. |
+| Spinner verbs and tips | `/witcher` | 55 verbs and 90 tips: lines from the books and in the characters' voices. A long turn moves to the next verb every 30 s; `/config witcher.spinnerSeconds=60` makes it 60. |
 | Status line | `/witcher` | `❖ project  ⚔ СРІБЛО · main  [model \| effort]`. A working branch takes the steel sword. |
 | Subagent panel | `/witcher` | Agents on a contract: Explore is the tracker, Plan the cartographer, a general-purpose agent a hired sword. |
 | Terminal profile | `/witcher`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
 
 ## Switching personas
 
-The marketplace also has [`richmond`](../richmond/). Install both and switch with
-one command: `/richmond` puts AFC Richmond on duty, `/witcher` brings the
-Witcher back. The HUD, sounds and status line follow within seconds, in every
-open session; the theme and spinner need a restart. Until you pick one, both
+The marketplace also has [`richmond`](../richmond/). Install both and switch
+with one command: `/richmond` puts AFC Richmond on duty, `/witcher` brings the
+Witcher back. The HUD, sounds, status line and spinner verbs follow within
+seconds, in every open session. The theme takes one pick in `/theme` (a plugin
+can't switch a custom theme in a running session), tips change from the next
+session and the terminal colours from the next tab. Until you pick one, both
 play their sounds and one HUD covers the other.
 
 ## What `/witcher` changes, and how to undo it
 
-The plugin can't set your theme, spinner or status line itself: those are keys
-in your `~/.claude/settings.json`. So `/witcher` runs `scripts/wear.sh`, which
+The plugin can't set your theme, spinner verbs, tips or status line itself:
+those are keys in your `~/.claude/settings.json`. So `/witcher` runs `scripts/wear.sh`, which
 writes them:
 
 - `theme`, `spinnerVerbs`, `spinnerTipsOverride`, `statusLine`, `subagentStatusLine`;

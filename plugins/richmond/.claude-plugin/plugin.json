@@ -1,8 +1,19 @@
 {
   "name": "richmond",
   "description": "AFC Richmond persona: match HUD above the prompt, Roy Kent sounds, Nelson Road themes, locker-room spinner and status lines",
-  "author": { "name": "Kateryna Kucherenko" },
+  "author": {
+    "name": "Kateryna Kucherenko"
+  },
   "homepage": "https://github.com/kaisa-kucherenko/claude-code-flow",
   "license": "MIT",
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "spinnerSeconds": {
+      "type": "number",
+      "title": "Spinner verb, seconds",
+      "description": "How often the spinner moves to the next verb while a turn runs",
+      "default": 30,
+      "min": 10
+    }
+  }
 }

@@ -76,8 +76,14 @@ on)
   # Another persona's copies go only once the settings no longer point at them
   find "$state" -mindepth 1 -maxdepth 1 -type d ! -name "$persona" -exec rm -rf {} +
   set_active "$persona"
+  # A plugin cannot switch a custom theme in a running session (only the /theme
+  # dialog can) and has no hook on tips, so the report says where each part
+  # shows up. The name is what /theme lists.
+  theme_name="$(jq -r .name "$root/themes/$theme.json")"
   jq -r .wornMessage "$meta"
-  echo "Settings: theme $theme, spinner verbs, tips, status line, subagent panel."
+  echo "Now, in every open session: the HUD, sounds, status line and spinner verbs."
+  echo "Theme: pick “$theme_name” in /theme for this session; new sessions start with it."
+  echo "Tips: from the next session."
 
   if has_gnome_terminal; then
     uuid="$(jq -r --arg t "$theme" '.themes[$t].terminalProfile' "$meta")"
@@ -88,7 +94,7 @@ on)
       gsettings set org.gnome.Terminal.ProfilesList list "$list"
     fi
     gsettings set org.gnome.Terminal.ProfilesList default "$uuid"
-    echo "GNOME Terminal: new tabs open with the $theme profile."
+    echo "GNOME Terminal: new tabs open with the $theme profile; this tab keeps its colours."
   fi
   ;;
 off)
@@ -100,12 +106,15 @@ off)
     term_default="$(jq -r '.terminalDefault // empty' "$backup")"
     if [[ -n "$term_default" ]] && has_gnome_terminal; then
       gsettings set org.gnome.Terminal.ProfilesList default "$term_default"
+      terminal_restored=yes
     fi
   fi
   set_active none
   find "$state" -mindepth 1 -maxdepth 1 ! -name active ! -name .lock -exec rm -rf {} +
   if [[ "$worn" == yes ]]; then
-    echo "Persona off: settings restored, persona HUDs and sounds silenced."
+    echo "Persona off: the HUD and sounds are silent, your own status line is back."
+    echo "Theme, spinner verbs and tips: your own from the next session; /theme switches the theme in this one."
+    if [[ "${terminal_restored:-}" == yes ]]; then echo "GNOME Terminal: new tabs open with your own profile again."; fi
   else
     echo "No persona was on, settings left alone. Persona HUDs and sounds silenced; /$persona brings this one back."
   fi

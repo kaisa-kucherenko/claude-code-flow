@@ -41,7 +41,7 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 | HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 % → penalties from 40 %). Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
 | Sounds | the plugin | Roy's whistle when an answer is ready, Roy swearing the moment Claude asks for a permission or a question. `CLAUDE_SOUND=off` mutes both. |
 | Themes | the plugin | Nelson Road and Diamond Dogs, listed in `/theme`. |
-| Spinner verbs and tips | `/richmond` | 60 verbs and 95 tips in the characters' voices. |
+| Spinner verbs and tips | `/richmond` | 60 verbs and 95 tips in the characters' voices. A long turn moves to the next verb every 30 s; `/config richmond.spinnerSeconds=60` makes it 60. |
 | Status line | `/richmond` | `⚑ project  ВДОМА · main  [model \| effort]`. A working branch is an away game, and its score is commits ahead : behind. |
 | Subagent panel | `/richmond` | Agents as the squad and staff: Explore is the scout, Plan is the coach at the whiteboard. |
 | Terminal profile | `/richmond`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
@@ -50,14 +50,16 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 
 The marketplace also has [`witcher`](../witcher/). Install both and switch with
 one command: `/witcher` puts the Witcher on duty, `/richmond` brings Richmond
-back. The HUD, sounds and status line follow within seconds, in every open
-session; the theme and spinner need a restart. Until you pick one, both play
-their sounds and one HUD covers the other.
+back. The HUD, sounds, status line and spinner verbs follow within seconds, in
+every open session. The theme takes one pick in `/theme` (a plugin can't switch
+a custom theme in a running session), tips change from the next session and the
+terminal colours from the next tab. Until you pick one, both play their sounds
+and one HUD covers the other.
 
 ## What `/richmond` changes, and how to undo it
 
-The plugin can't set your theme, spinner or status line itself: those are keys
-in your `~/.claude/settings.json`. So `/richmond` runs `scripts/wear.sh`, which
+The plugin can't set your theme, spinner verbs, tips or status line itself:
+those are keys in your `~/.claude/settings.json`. So `/richmond` runs `scripts/wear.sh`, which
 writes them:
 
 - `theme`, `spinnerVerbs`, `spinnerTipsOverride`, `statusLine`, `subagentStatusLine`;
