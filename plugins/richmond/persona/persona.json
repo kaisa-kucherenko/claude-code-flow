@@ -1,0 +1,13 @@
+{
+  "wornMessage": "Річмонд на полі",
+  "tipsLabel": "В роздягальні",
+  "defaultTheme": "nelson-road",
+  "themes": {
+    "nelson-road": {
+      "terminalProfile": "aa2a6a69-7719-4cfe-9d28-42a1004e567f"
+    },
+    "diamond-dogs": {
+      "terminalProfile": "47d68db4-854a-47b3-88e6-74f08d300338"
+    }
+  }
+}

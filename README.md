@@ -24,9 +24,15 @@ yourself.
 | Status line | The context-% number that drives the whole workflow, with traffic-light thresholds (green <30%, yellow 30–39%, red at 40+). | [`statusline/`](statusline/) |
 | Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle), a diagram drawer (Ariel), a test pair (Sam writes, Dean breaks) with a shared `pytest-quality` skill. | [`agents/`](agents/) |
 | Precogs workflow | Orchestrates the panel: three reviewers in parallel, then a synthesis that dedupes and cross-votes findings. | [`workflows/`](workflows/) |
+| Personas | Claude Code dressed as a character, one plugin each: a HUD above the prompt, sounds, themes, spinner lines, status line. AFC Richmond from *Ted Lasso*. Linux, Ukrainian texts. | [`plugins/richmond/`](plugins/richmond/) |
 
 Each folder's README has the install steps and the reasoning; everything
-targets `~/.claude`. Run all install commands from the repo root.
+targets `~/.claude`. Run all install commands from the repo root. The personas
+are a plugin marketplace instead:
+
+```
+/plugin install richmond --marketplace kaisa-kucherenko/claude-code-flow
+```
 
 ## The flow in one paragraph
 

@@ -1,0 +1,8 @@
+{
+  "name": "richmond",
+  "description": "AFC Richmond persona: match HUD above the prompt, Roy Kent sounds, Nelson Road themes, locker-room spinner and status lines",
+  "author": { "name": "Kateryna Kucherenko" },
+  "homepage": "https://github.com/kaisa-kucherenko/claude-code-flow",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

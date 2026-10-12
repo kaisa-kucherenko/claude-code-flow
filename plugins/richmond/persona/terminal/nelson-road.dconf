@@ -1,0 +1,14 @@
+[/]
+audible-bell=false
+background-color='#1A2140'
+bold-color='#F2C94C'
+bold-color-same-as-fg=false
+bold-is-bright=true
+cursor-background-color='#F2C94C'
+cursor-colors-set=true
+cursor-foreground-color='#1A2140'
+cursor-shape='ibeam'
+foreground-color='#DDE1F0'
+palette=['#1A2140', '#F0556A', '#7FC67E', '#F2C94C', '#5B86F5', '#A99BD6', '#7FB8D6', '#DDE1F0', '#8C96C2', '#FF7A8C', '#9AD79A', '#FFE07A', '#7FA7F0', '#C2B3F0', '#9AD0EA', '#F2F3FA']
+use-theme-colors=false
+visible-name='Richmond Nelson Road'

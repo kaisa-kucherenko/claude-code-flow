@@ -1,0 +1,80 @@
+# richmond — AFC Richmond persona for Claude Code
+
+Claude Code dressed as AFC Richmond from *Ted Lasso*: a match HUD above the
+prompt, Roy Kent's whistle when an answer is ready, two Nelson Road themes,
+locker-room spinner lines and a status line where `main` is a home game.
+
+All the texts (HUD, spinner verbs, tips, status line, subagent panel) are in
+**Ukrainian**.
+
+## Requirements
+
+- **Linux.** Built and tested on Ubuntu 22.04 with GNOME Terminal 3.44 and
+  Claude Code 2.1.296. The HUD needs Claude Code 2.1.287 or later (mods on by default).
+- `jq` for `/richmond` and the status lines (`sudo apt install jq`).
+- Sounds play through `paplay` (PulseAudio or PipeWire, default on Ubuntu).
+  Without it the plugin stays silent.
+- The terminal profile is for GNOME Terminal. Where it isn't installed,
+  `/richmond` skips it. The colours are in `persona/terminal/*.dconf`, so you can
+  copy them into your own terminal.
+
+## Install
+
+```
+claude plugin marketplace add kaisa-kucherenko/claude-code-flow
+claude plugin install richmond@claude-code-flow
+```
+
+Then, inside Claude Code:
+
+```
+/richmond                  # Nelson Road: navy and gold
+/richmond diamond-dogs     # Diamond Dogs: graphite and blue
+```
+
+Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
+
+## What you get
+
+| Part | Comes with | What it shows |
+|------|-----------|---------------|
+| HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 % → penalties from 40 %). Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
+| Sounds | the plugin | Roy's whistle when an answer is ready, Roy swearing when Claude is waiting for you (a permission prompt or a question). `CLAUDE_SOUND=off` mutes both. |
+| Themes | the plugin | Nelson Road and Diamond Dogs, listed in `/theme`. |
+| Spinner verbs and tips | `/richmond` | 60 verbs and 95 tips in the characters' voices. |
+| Status line | `/richmond` | `⚑ project  ВДОМА · main  [model \| effort]`. A working branch is an away game, and its score is commits ahead : behind. |
+| Subagent panel | `/richmond` | Agents as the squad and staff: Explore is the scout, Plan is the coach at the whiteboard. |
+| Terminal profile | `/richmond`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
+
+## What `/richmond` changes, and how to undo it
+
+The plugin can't set your theme, spinner or status line itself: those are keys
+in your `~/.claude/settings.json`. So `/richmond` runs `scripts/wear.sh`, which
+writes them:
+
+- `theme`, `spinnerVerbs`, `spinnerTipsOverride`, `statusLine`, `subagentStatusLine`;
+- the AFC Richmond and Witcher persona plugins in `enabledPlugins` (only one persona at a time);
+- the default GNOME Terminal profile.
+
+The first run saves the previous values of exactly those keys to
+`~/.claude/personas/backup.json`. **`/richmond off`** puts them back and
+disables the persona plugins. Run it before `claude plugin uninstall`, or
+the status lines keep running from their copies. Everything else in your settings stays as it is,
+including whatever you changed while the persona was on. The status line
+scripts are copied to `~/.claude/personas/` because the plugin's own folder
+changes path with every update.
+
+## Development
+
+```
+claude plugin validate plugins/richmond
+claude plugin test plugins/richmond        # the HUD and the /richmond command
+bash plugins/richmond/tests/wear.test.sh   # wear.sh against a throwaway config
+```
+
+## Rights
+
+An unofficial, non-commercial fan project. *Ted Lasso*, AFC Richmond and their
+characters belong to their rights holders (Apple TV+, Warner Bros. Television).
+The two voice clips are under three seconds each. If you hold the rights and
+want them out, open an issue.

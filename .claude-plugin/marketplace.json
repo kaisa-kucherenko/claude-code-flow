@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-code-flow",
+  "description": "Personas for Claude Code: a HUD, sounds, themes and spinner lines in one plugin each",
+  "owner": { "name": "Kateryna Kucherenko", "url": "https://github.com/kaisa-kucherenko" },
+  "plugins": [
+    {
+      "name": "richmond",
+      "source": "./plugins/richmond",
+      "description": "AFC Richmond persona: match HUD, Roy Kent sounds, Nelson Road themes",
+      "category": "personas"
+    }
+  ]
+}
