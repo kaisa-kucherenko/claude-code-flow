@@ -118,15 +118,15 @@ async function wear($: Dollar, args: string): Promise<string> {
   const arg = args.trim()
   const argv = ['bash', `${$.plugin.root}/scripts/wear.sh`, ...(arg === 'off' ? ['off'] : ['on', ...(arg ? [arg] : [])])]
   const r = await $.process.run(argv).catch((err: unknown) => ({ exitCode: -1, stdout: '', stderr: String(err) }))
-  if (r.exitCode !== 0) return `Не вийшло: ${r.stderr.trim()}`
-  return `${r.stdout.trim()}\nHUD, звуки і statusline вже перемкнулись. Перезапусти Claude Code (/exit, потім claude -c), щоб підхопились тема і спінер.`
+  if (r.exitCode !== 0) return `Failed: ${r.stderr.trim()}`
+  return `${r.stdout.trim()}\nThe HUD, sounds and status line have already switched. Restart Claude Code (/exit, then claude -c) to pick up the theme and spinner.`
 }
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'richmond',
-      description: 'Вдягнути персону Річмонд: тема, спінер, statusline, профіль терміналу',
+      description: 'Put on the AFC Richmond persona: theme, spinner, status line, terminal profile',
       argumentHint: '[nelson-road | diamond-dogs | off]',
     })
     onDuty = (await isOnDuty($)) ?? true

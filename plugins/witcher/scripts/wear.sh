@@ -3,8 +3,9 @@
 # a plugin cannot carry: the settings.json keys for the theme, spinner verbs and
 # tips, the status line and the subagent panel, plus a GNOME Terminal profile.
 # The first `on` saves what those keys held, so `off` brings back the person's
-# own values even after switching between personas. Only those keys are
-# touched: everything else in settings.json stays as it is. personas/active
+# own values even after switching between personas. Besides those keys, `on`
+# switches this plugin back on in enabledPlugins if it was off there, and `off`
+# leaves it on; everything else in settings.json stays as it is. personas/active
 # names the persona on duty, so the HUD and sounds of every other persona
 # plugin installed alongside keep quiet; `off` sets it to none.
 #   wear.sh on [theme]   a theme from persona/persona.json, its default if left out
@@ -29,21 +30,21 @@ write_cfg() {
 }
 has_gnome_terminal() { command -v gnome-terminal > /dev/null && command -v gsettings > /dev/null && command -v dconf > /dev/null; }
 
-command -v jq > /dev/null || { echo "потрібен jq: sudo apt install jq" >&2; exit 1; }
+command -v jq > /dev/null || { echo "jq is required: sudo apt install jq" >&2; exit 1; }
 [[ -f "$cfg" ]] || { mkdir -p "$claude_dir"; echo '{}' > "$cfg"; }
 
 # Two sessions switching at once would interleave the backup and the settings write
 mkdir -p "$state"
 if command -v flock > /dev/null; then
   exec 9> "$state/.lock"
-  flock -w 10 9 || { echo "інша сесія саме перемикає персону, спробуй ще раз" >&2; exit 1; }
+  flock -w 10 9 || { echo "another session is switching personas right now, try again" >&2; exit 1; }
 fi
 
 case "$action" in
 on)
   theme="${2:-$(jq -r .defaultTheme "$meta")}"
   if ! jq -e --arg t "$theme" '.themes | has($t)' "$meta" > /dev/null; then
-    echo "нема теми $theme, є: $(jq -r '.themes | keys_unsorted | join(", ")' "$meta")" >&2
+    echo "no theme $theme; available: $(jq -r '.themes | keys_unsorted | join(", ")' "$meta")" >&2
     exit 1
   fi
 
@@ -75,7 +76,8 @@ on)
   # Another persona's copies go only once the settings no longer point at them
   find "$state" -mindepth 1 -maxdepth 1 -type d ! -name "$persona" -exec rm -rf {} +
   set_active "$persona"
-  echo "$(jq -r .wornMessage "$meta"): тема $theme, спінер, підказки, statusline, панель субагентів."
+  jq -r .wornMessage "$meta"
+  echo "Settings: theme $theme, spinner verbs, tips, status line, subagent panel."
 
   if has_gnome_terminal; then
     uuid="$(jq -r --arg t "$theme" '.themes[$t].terminalProfile' "$meta")"
@@ -86,7 +88,7 @@ on)
       gsettings set org.gnome.Terminal.ProfilesList list "$list"
     fi
     gsettings set org.gnome.Terminal.ProfilesList default "$uuid"
-    echo "GNOME Terminal: нові вкладки відкриваються з профілем $theme."
+    echo "GNOME Terminal: new tabs open with the $theme profile."
   fi
   ;;
 off)
@@ -103,10 +105,10 @@ off)
   set_active none
   find "$state" -mindepth 1 -maxdepth 1 ! -name active ! -name .lock -exec rm -rf {} +
   if [[ "$worn" == yes ]]; then
-    echo "Персону знято: налаштування повернуто, HUD і звуки персон вимкнено."
+    echo "Persona off: settings restored, persona HUDs and sounds silenced."
   else
-    echo "Персону не вдягали, налаштування не чіпав. HUD і звуки персон вимкнено, повернути: /$persona."
+    echo "No persona was on, settings left alone. Persona HUDs and sounds silenced; /$persona brings this one back."
   fi
   ;;
-*) echo "використання: wear.sh on [тема] | off" >&2; exit 1 ;;
+*) echo "usage: wear.sh on [theme] | off" >&2; exit 1 ;;
 esac

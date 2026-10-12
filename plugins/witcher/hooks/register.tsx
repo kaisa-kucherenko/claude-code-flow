@@ -17,6 +17,8 @@ const usage = atom({ plugin: 'witcher', key: 'usage' } as const, {
 // A session is meant to be handed off to a fresh one at 30 % of context, so the
 // toxicity bar marks that line the way the game marks the overdose threshold.
 const TOXICITY_THRESHOLD = 30
+// Past this the handoff is overdue, and the bar turns red.
+const TOXICITY_OVERDOSE = 40
 
 function bar(percent: number, width: number): string {
   const filled = Math.round((Math.min(100, Math.max(0, percent)) / 100) * width)
@@ -90,15 +92,15 @@ async function wear($: Dollar, args: string): Promise<string> {
   const arg = args.trim()
   const argv = ['bash', `${$.plugin.root}/scripts/wear.sh`, ...(arg === 'off' ? ['off'] : ['on', ...(arg ? [arg] : [])])]
   const r = await $.process.run(argv).catch((err: unknown) => ({ exitCode: -1, stdout: '', stderr: String(err) }))
-  if (r.exitCode !== 0) return `Не вийшло: ${r.stderr.trim()}`
-  return `${r.stdout.trim()}\nHUD, звуки і statusline вже перемкнулись. Перезапусти Claude Code (/exit, потім claude -c), щоб підхопились тема і спінер.`
+  if (r.exitCode !== 0) return `Failed: ${r.stderr.trim()}`
+  return `${r.stdout.trim()}\nThe HUD, sounds and status line have already switched. Restart Claude Code (/exit, then claude -c) to pick up the theme and spinner.`
 }
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'witcher',
-      description: 'Вдягнути персону Відьмака: тема, спінер, statusline, профіль терміналу',
+      description: 'Put on The Witcher 3 persona: theme, spinner, status line, terminal profile',
       argumentHint: '[corvo-bianco | kaer-morhen | off]',
     })
     onDuty = (await isOnDuty($)) ?? true
@@ -137,7 +139,7 @@ export const register: Register = on => {
     const label = (long: string, short: string) => (wide ? long : short)
 
     const tox = u.ctx ?? 0
-    const toxColor = tox >= 40 ? 'error' : tox >= TOXICITY_THRESHOLD ? 'warning' : 'success'
+    const toxColor = tox >= TOXICITY_OVERDOSE ? 'error' : tox >= TOXICITY_THRESHOLD ? 'warning' : 'success'
     // The bar reads like the game (full = good, it drains); the number reads
     // like /usage (how much is spent), tagged ctx / 5h / 7d so it cannot be
     // mistaken for what is left.

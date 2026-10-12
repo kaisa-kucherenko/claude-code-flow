@@ -61,18 +61,19 @@ in your `~/.claude/settings.json`. So `/richmond` runs `scripts/wear.sh`, which
 writes them:
 
 - `theme`, `spinnerVerbs`, `spinnerTipsOverride`, `statusLine`, `subagentStatusLine`;
+- `enabledPlugins`, only if `richmond` is switched off there: it is switched back on;
 - `~/.claude/personas/active`, which names the persona on duty: with several
   persona plugins installed, only that one shows its HUD and plays sounds;
 - the default GNOME Terminal profile.
 
-The first run saves the previous values of exactly those keys to
+The first run saves the previous values of the five keys in the first line to
 `~/.claude/personas/backup.json`. **`/richmond off`** puts them back and
 silences the HUD and sounds of every persona plugin; they stay installed, and
 `/richmond` puts the persona back on. Run it before `claude plugin uninstall`,
 or the status lines keep running from their copies. Everything else in your
-settings stays as it is, including whatever you changed while the persona was on. The status line
-scripts are copied to `~/.claude/personas/` because the plugin's own folder
-changes path with every update.
+settings stays as it is, including whatever you changed while the persona was
+on. The status line scripts are copied to `~/.claude/personas/` because the
+plugin's own folder changes path with every update.
 
 ## Development
 

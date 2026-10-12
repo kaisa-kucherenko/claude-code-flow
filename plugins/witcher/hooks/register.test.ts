@@ -88,7 +88,7 @@ test('the bar drains like the game while the number counts what is spent', async
 // The test's `$` stands for the engine, so a command runs without a composer origin.
 const run = async ($: any, args: string): Promise<string> => (await $.command.run({ command: 'witcher', args })).text ?? ''
 
-function fakeWear(on: any, result = { exitCode: 0, stdout: 'Відьмак на шляху: тема corvo-bianco\n', stderr: '' }) {
+function fakeWear(on: any, result = { exitCode: 0, stdout: 'Відьмак на шляху\nSettings: theme corvo-bianco, spinner verbs, tips, status line, subagent panel.\n', stderr: '' }) {
   const calls: string[][] = []
   on('process.run', (_$: any, e: any) => {
     calls.push([...e.argv])
@@ -102,8 +102,8 @@ test('/witcher runs wear.sh on with the default theme and relays what it changed
   const text = await run($, '')
   expect(calls.length).toBe(1)
   expect(calls[0]?.slice(1)).toEqual([expect.stringMatching(/\/scripts\/wear\.sh$/), 'on'])
-  expect(text).toMatch(/Відьмак на шляху: тема corvo-bianco/)
-  expect(text).toMatch(/Перезапусти/)
+  expect(text).toMatch(/Відьмак на шляху\nSettings: theme corvo-bianco/)
+  expect(text).toMatch(/Restart Claude Code/)
 })
 
 test('/witcher <theme> passes the theme through, trimmed', async ($, on) => {
@@ -119,10 +119,10 @@ test('/witcher off takes the persona off', async ($, on) => {
 })
 
 test('a failed wear.sh shows its stderr instead of a restart hint', async ($, on) => {
-  fakeWear(on, { exitCode: 1, stdout: '', stderr: 'нема теми novigrad, є: corvo-bianco, kaer-morhen\n' })
+  fakeWear(on, { exitCode: 1, stdout: '', stderr: 'no theme novigrad; available: corvo-bianco, kaer-morhen\n' })
   const text = await run($, 'novigrad')
-  expect(text).toMatch(/нема теми novigrad/)
-  expect(text).not.toMatch(/Перезапусти/)
+  expect(text).toMatch(/no theme novigrad/)
+  expect(text).not.toMatch(/Restart Claude Code/)
 })
 
 // The mocked clock of the last mount, so a test can move time

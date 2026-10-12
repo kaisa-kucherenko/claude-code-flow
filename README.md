@@ -31,8 +31,9 @@ targets `~/.claude`. Run all install commands from the repo root. The personas
 are a plugin marketplace instead:
 
 ```
-/plugin install richmond --marketplace kaisa-kucherenko/claude-code-flow
-/plugin install witcher --marketplace kaisa-kucherenko/claude-code-flow
+claude plugin marketplace add kaisa-kucherenko/claude-code-flow
+claude plugin install richmond@claude-code-flow
+claude plugin install witcher@claude-code-flow
 ```
 
 ## The flow in one paragraph

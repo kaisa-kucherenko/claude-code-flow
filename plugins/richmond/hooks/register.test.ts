@@ -109,7 +109,7 @@ test('a spent week tears the sign', async ($, on) => {
 // The test's `$` stands for the engine, so a command runs without a composer origin.
 const run = async ($: any, args: string): Promise<string> => (await $.command.run({ command: 'richmond', args })).text ?? ''
 
-function fakeWear(on: any, result = { exitCode: 0, stdout: 'Річмонд на полі: тема nelson-road\n', stderr: '' }) {
+function fakeWear(on: any, result = { exitCode: 0, stdout: 'Річмонд на полі\nSettings: theme nelson-road, spinner verbs, tips, status line, subagent panel.\n', stderr: '' }) {
   const calls: string[][] = []
   on('process.run', (_$: any, e: any) => {
     calls.push([...e.argv])
@@ -123,8 +123,8 @@ test('/richmond runs wear.sh on with the default theme and relays what it change
   const text = await run($, '')
   expect(calls.length).toBe(1)
   expect(calls[0]?.slice(1)).toEqual([expect.stringMatching(/\/scripts\/wear\.sh$/), 'on'])
-  expect(text).toMatch(/Річмонд на полі: тема nelson-road/)
-  expect(text).toMatch(/Перезапусти/)
+  expect(text).toMatch(/Річмонд на полі\nSettings: theme nelson-road/)
+  expect(text).toMatch(/Restart Claude Code/)
 })
 
 test('/richmond <theme> passes the theme through, trimmed', async ($, on) => {
@@ -140,8 +140,8 @@ test('/richmond off takes the persona off', async ($, on) => {
 })
 
 test('a failed wear.sh shows its stderr instead of a restart hint', async ($, on) => {
-  fakeWear(on, { exitCode: 1, stdout: '', stderr: 'нема теми anfield, є: nelson-road, diamond-dogs\n' })
+  fakeWear(on, { exitCode: 1, stdout: '', stderr: 'no theme anfield; available: nelson-road, diamond-dogs\n' })
   const text = await run($, 'anfield')
-  expect(text).toMatch(/нема теми anfield/)
-  expect(text).not.toMatch(/Перезапусти/)
+  expect(text).toMatch(/no theme anfield/)
+  expect(text).not.toMatch(/Restart Claude Code/)
 })
