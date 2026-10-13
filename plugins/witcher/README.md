@@ -44,9 +44,9 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the Path.
 | HUD above the prompt | the plugin | Toxicity is the context % and carries a mark at 30 %, the point to hand the session off. Stamina is the 5-hour limit and vitality the 7-day limit, both draining like the game's bars. |
 | Sounds | the plugin | The level-up chime when an answer is ready, «Something to think about» the moment Claude asks for a permission or a question. Each moment takes any clip of the set; see below. |
 | Themes | the plugin | Corvo Bianco and Kaer Morhen, listed in `/theme`. |
-| Spinner verbs and tips | `/witcher` | 55 verbs and 90 tips: lines from the books and in the characters' voices. A long turn moves to the next verb every 30 s; `/config witcher.spinnerSeconds=60` makes it 60. |
+| Spinner verbs and tips | `/witcher` | 55 verbs and 76 tips: lines from the books and in the characters' voices. A long turn moves to the next verb every 30 s; `/config witcher.spinnerSeconds=60` makes it 60. |
 | Status line | `/witcher` | `❖ project  ⚔ СРІБЛО · main  [model \| effort]`. A working branch takes the steel sword. |
-| Subagent panel | `/witcher` | Agents on a contract: Explore is the tracker, Plan the cartographer, a general-purpose agent a hired sword. |
+| Subagent panel | `/witcher` | Agents on a contract, three lines each: Explore follows its witcher senses, Plan is Vesemir at the map, a general-purpose agent a hired sword. |
 | Terminal profile | `/witcher`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
 | Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
 

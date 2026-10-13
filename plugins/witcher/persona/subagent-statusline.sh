@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
 # Rows for Claude Code's subagent panel, the agents as characters of the
-# Witcher world on a job: roster name + what they are doing, the live progress
+# Witcher world on a job: one of three lines per agent, the live progress
 # label, elapsed time, and tokens coloured by appetite. Agents off the roster
 # show their own type. Stdin: {"columns": N, "tasks": [...]} once per refresh
 # tick; stdout: one {"id","content"} line per row. Needs jq.
 jq -r --argjson now "$(date +%s%3N)" '
 def roster: {
-  "general-purpose": "Найманець на контракті", Explore: "Слідопит нюхає сліди", Plan: "Картограф креслить",
-  "claude-code-guide": "Гримуар гортає", "statusline-setup": "Коваль кує",
-  agatha: "Агата бачить", arthur: "Артур читає", dash: "Деш біжить",
-  geralt: "Геральт на контракті", lyutik: "Лютик складає баладу",
-  sam: "Сем читає лор", dean: "Дін ламає тести", kondo: "Кондо прибирає",
-  gilfoyle: "Гілфойл ламає замок", lauda: "Лауда міряє", jobs: "Джобс малює",
-  keeley: "Кілі пише копі", ariel: "Арієль малює схему"
+  "general-purpose": ["Найманець за крони", "Найманець на контракті", "Відьмак читає дошку"],
+  Explore: ["Відьмацьке чуття", "Слідопит іде по сліду", "Медальйон тремтить"],
+  Plan: ["Весемір креслить", "Весемір: спершу думай", "Дійкстра плете інтригу"],
+  "claude-code-guide": ["Бібліотека Оксенфурта", "Гортає гримуар", "Бестіарій відкрито"],
+  "statusline-setup": ["Краснолюд кує руни", "Коваль із Махакаму", "Рунописець за роботою"],
+  agatha: ["Агата медитує", "Агата читає знаки", "Агата розвіює ілюзію"],
+  arthur: ["Артур у мегаскопі", "Артур телепортувався", "Артур, гість з Офіру"],
+  dash: ["Деш на Плітці", "Деш галопом", "Деш скаче напрямки"],
+  geralt: ["Ґеральт на контракті", "Ґеральт точить срібло", "Ґеральт бурчить „хм“"],
+  lyutik: ["Лютик складає баладу", "Лютик настроює лютню", "Лютик співає в корчмі"],
+  sam: ["Сем читає бестіарій", "Сем ставить пастки", "Сем записує прикмети"],
+  dean: ["Дін кусає монету", "Дін б\u0027є по слабкому", "Дін перевіряє срібло"],
+  kondo: ["Кондо веде реєстр", "Кондо лічить скарбницю", "Кондо розкладає зілля"],
+  gilfoyle: ["Гілфойл ставить Ірден", "Гілфойл ламає замок", "Гілфойл нюхає отруту"],
+  lauda: ["Лауда п\u0027є Грім", "Лауда міряє галоп", "Лауда на перегонах"],
+  jobs: ["Джобс шиє дублет", "Джобс малює герб", "Джобс обирає барви"],
+  keeley: ["Кілі пише оголошення", "Кілі пускає чутки", "Кілі продає еліксири"],
+  ariel: ["Арієль креслить мапу", "Арієль малює схему", "Арієль, морська діва"]
 };
 def esc(c): "\u001b[" + c + "m";
 def pad(n): . + ((" " * ([n - length, 0] | max)) // "");
@@ -25,7 +36,11 @@ def elapsed: ([($now - .) / 1000 | floor, 0] | max) as $s
 
 (.columns // 120) as $cols
 | (.tasks // [])[]
-| (roster[.agentType // ""] // (.agentType // .name // "агент")) as $who
+| roster[.agentType // ""] as $lines
+# The task id picks the line, so one task keeps its line across refresh ticks
+# while different tasks of the same agent read differently.
+| (if $lines then $lines[(.id // "" | explode | add // 0) % ($lines | length)]
+   else .agentType // .name // "агент" end) as $who
 | (.status == "running") as $live
 | ([$cols - 48, 20] | max) as $labelw
 | ($who | pad(22) | cut(22)) as $name

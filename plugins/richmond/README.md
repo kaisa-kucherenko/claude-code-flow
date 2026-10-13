@@ -43,9 +43,9 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 | HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 % → penalties from 40 %). Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
 | Sounds | the plugin | Roy's "All right, let's go again!" when an answer is ready, Roy swearing the moment Claude asks for a permission or a question. Each moment takes any clip of the set; see below. |
 | Themes | the plugin | Nelson Road and Diamond Dogs, listed in `/theme`. |
-| Spinner verbs and tips | `/richmond` | 60 verbs and 95 tips in the characters' voices. A long turn moves to the next verb every 30 s; `/config richmond.spinnerSeconds=60` makes it 60. |
+| Spinner verbs and tips | `/richmond` | 60 verbs and 77 tips in the characters' voices. A long turn moves to the next verb every 30 s; `/config richmond.spinnerSeconds=60` makes it 60. |
 | Status line | `/richmond` | `⚑ project  ВДОМА · main  [model \| effort]`. A working branch is an away game, and its score is commits ahead : behind. |
-| Subagent panel | `/richmond` | Agents as the squad and staff: Explore is the scout, Plan is the coach at the whiteboard. |
+| Subagent panel | `/richmond` | Agents as the squad and staff, three lines each: Explore is the scout, Plan is Beard at the whiteboard. |
 | Terminal profile | `/richmond`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
 | Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
 
