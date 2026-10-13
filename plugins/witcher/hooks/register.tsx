@@ -17,9 +17,10 @@ const usage = atom({ plugin: 'witcher', key: 'usage' } as const, {
 
 // A session is meant to be handed off to a fresh one at 30 % of context, so the
 // toxicity bar marks that line the way the game marks the overdose threshold.
-const TOXICITY_THRESHOLD = 30
-// Past this the handoff is overdue, and the bar turns red.
-const TOXICITY_OVERDOSE = 40
+// Where to hand off is a habit, not a law, so `toxicityThreshold` moves it.
+const DEFAULT_TOXICITY_THRESHOLD = 30
+// Past the mark by this much the handoff is overdue, and the bar turns red.
+const TOXICITY_OVERDUE_BY = 10
 
 function bar(percent: number, width: number): string {
   const filled = Math.round((Math.min(100, Math.max(0, percent)) / 100) * width)
@@ -27,9 +28,9 @@ function bar(percent: number, width: number): string {
 }
 
 // Toxicity carries the threshold mark inside the bar, like the game's line.
-function toxicityBar(percent: number, width: number): string {
+function toxicityBar(percent: number, threshold: number, width: number): string {
   const cells = bar(percent, width).split('')
-  const mark = Math.round((TOXICITY_THRESHOLD / 100) * width)
+  const mark = Math.round((threshold / 100) * width)
   if (mark < width) cells[mark] = cells[mark] === '▰' ? '▮' : '│'
   return cells.join('')
 }
@@ -183,6 +184,8 @@ async function wear($: Dollar, args: string): Promise<string> {
 
 export const register: Register = (on, options) => {
   const stepMs = Math.max(10, Number(options.spinnerSeconds) || 30) * 1000
+  // Same bounds as toxicityThreshold in plugin.json; the clamp covers a value the host saved unchecked
+  const threshold = Math.min(90, Math.max(5, Number(options.toxicityThreshold) || DEFAULT_TOXICITY_THRESHOLD))
 
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -280,7 +283,7 @@ export const register: Register = (on, options) => {
     const label = (long: string, short: string) => (wide ? long : short)
 
     const tox = u.ctx ?? 0
-    const toxColor = tox >= TOXICITY_OVERDOSE ? 'error' : tox >= TOXICITY_THRESHOLD ? 'warning' : 'success'
+    const toxColor = tox >= threshold + TOXICITY_OVERDUE_BY ? 'error' : tox >= threshold ? 'warning' : 'success'
     // The bar reads like the game (full = good, it drains); the number reads
     // like /usage (how much is spent), tagged ctx / 5h / 7d so it cannot be
     // mistaken for what is left.
@@ -293,7 +296,7 @@ export const register: Register = (on, options) => {
           <Text>
             <Text color={toxColor}>☠ </Text>
             <Text dimColor>{label('Токсичність ', '')}</Text>
-            <Text color={toxColor}>{toxicityBar(tox, w)}</Text>
+            <Text color={toxColor}>{toxicityBar(tox, threshold, w)}</Text>
             <Text dimColor> ctx </Text>
             <Text color={toxColor}>{tox}%</Text>
             <Text dimColor>   </Text>

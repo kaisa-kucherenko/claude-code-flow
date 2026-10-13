@@ -15,6 +15,14 @@
       "default": 30,
       "min": 10
     },
+    "toxicityThreshold": {
+      "type": "number",
+      "title": "Toxicity mark, % of context",
+      "description": "Where the toxicity bar marks the handoff line; it turns red 10 points past it",
+      "default": 30,
+      "min": 5,
+      "max": 90
+    },
     "turnDoneSound": {
       "type": "string",
       "title": "Sound: answer ready",

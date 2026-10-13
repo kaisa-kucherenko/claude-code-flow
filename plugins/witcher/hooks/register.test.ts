@@ -65,6 +65,39 @@ test('toxicity past the handoff line turns the bar', async ($, on) => {
   expect(toxTexts.some(t => t.props.color === 'warning')).toBe(true)
 })
 
+test('toxicityThreshold moves the handoff mark and the colour with it', { options: { toxicityThreshold: 50 } }, async ($, on) => {
+  on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000, percent: 34 }, rateLimits: [] } }))
+  on('command.register', (_$, e) => ({ value: { command: e.name } }))
+  on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  mock.clock(on)
+  await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+  const band = await $.ui.mount({
+    plugin: 'witcher', surface: 'terminal', component: 'AbovePrompt',
+    props: { hasSurvey: false, isWorking: false, maxRows: 6, bodyColumns: 160, scroll: { offset: 0, bodyRows: 5 }, view: {} },
+  })
+  // 34 % fills three of ten cells; the mark sits at cell five, not at three
+  expect(await band.find({ text: /^▰▰▰▱▱│▱▱▱▱$/ })).toBeDefined()
+  const toxTexts = await band.findAll({ type: 'Text', text: /34%/ })
+  expect(toxTexts.some(t => t.props.color === 'success')).toBe(true)
+  expect(toxTexts.some(t => t.props.color === 'warning')).toBe(false)
+})
+
+test('red counts from the moved mark, not from the default one', { options: { toxicityThreshold: 50 } }, async ($, on) => {
+  on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000, percent: 55 }, rateLimits: [] } }))
+  on('command.register', (_$, e) => ({ value: { command: e.name } }))
+  on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  mock.clock(on)
+  await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+  const band = await $.ui.mount({
+    plugin: 'witcher', surface: 'terminal', component: 'AbovePrompt',
+    props: { hasSurvey: false, isWorking: false, maxRows: 6, bodyColumns: 160, scroll: { offset: 0, bodyRows: 5 }, view: {} },
+  })
+  // 55 % is past the default's red line (40) but only 5 past a mark at 50
+  const toxTexts = await band.findAll({ type: 'Text', text: /55%/ })
+  expect(toxTexts.some(t => t.props.color === 'warning')).toBe(true)
+  expect(toxTexts.some(t => t.props.color === 'error')).toBe(false)
+})
+
 test('the bar drains like the game while the number counts what is spent', async ($, on) => {
   on('session.usage', () => ({ value: {
     startedAt: 0,
