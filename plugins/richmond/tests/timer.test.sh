@@ -71,15 +71,23 @@ reset; bash "$timer" set 10 > /dev/null; rm -f "$tmp/unit"
 expect "a state file whose unit is gone counts as no timer" '[[ "$(bash "$timer" status)" == "No timer running."* && ! -f "$state/timer.json" ]]'
 
 # Firing: the persona on duty speaks, whichever plugin set the timer
-mkdir -p "$tmp/other/persona" "$tmp/other/sounds"
+mkdir -p "$tmp/other/persona" "$tmp/other/sounds" "$tmp/other/scripts" "$tmp/other/.claude-plugin"
 echo '{"title": "Тайм-аут", "phrases": ["раз", "два", "три"]}' > "$tmp/other/persona/breaks.json"
-touch "$tmp/other/sounds/timer-done.oga"
+echo '{"name": "other", "userConfig": {"timerDoneSound": {"options": ["gong", "bell"], "default": "gong"}}}' > "$tmp/other/.claude-plugin/plugin.json"
+touch "$tmp/other/sounds/gong.oga" "$tmp/other/sounds/bell.oga"
+cp "$root/scripts/clip.sh" "$tmp/other/scripts/"
 reset; mkdir -p "$state/roots"; echo "$tmp/other" > "$state/roots/other"; echo other > "$tmp/cfg/personas/active"
 bash "$timer" set 5 > /dev/null; id="$(fire_id)"
 bash "$timer" fire "$id"
 expect "on time it marks the band and drops the timer" '[[ "$(jq -r .id "$state/rang.json")" == "$id" && ! -f "$state/timer.json" ]]'
 expect "the banner carries the persona on duty's title" 'grep -q "notify-send --app-name=Claude Code Тайм-аут" "$calls"'
-expect "the clip is that persona's timer-done" 'grep -q "paplay $tmp/other/sounds/timer-done.oga" "$calls"'
+expect "the clip is that persona's default timer clip" 'grep -q "paplay $tmp/other/sounds/gong.oga" "$calls"'
+
+# systemd hands the fire no session environment, so the pick comes from settings.json
+echo '{"pluginConfigs": {"other@claude-code-flow": {"options": {"timerDoneSound": "bell"}}}}' > "$tmp/cfg/settings.json"
+bash "$timer" set 5 > /dev/null; : > "$calls"; bash "$timer" fire "$(fire_id)"
+expect "the persona's pick in settings.json rings instead" 'grep -q "paplay $tmp/other/sounds/bell.oga" "$calls"'
+rm -f "$tmp/cfg/settings.json"
 
 prev=""; repeated=no
 for _ in $(seq 12); do
@@ -108,7 +116,7 @@ expect "CLAUDE_SOUND=off keeps the banner and mutes the clip" 'grep -q notify-se
 me="$(jq -r .name "$root/.claude-plugin/plugin.json")"
 reset; echo "$me" > "$tmp/cfg/personas/active"
 bash "$timer" set 5 > /dev/null; bash "$timer" fire "$(fire_id)"
-expect "without roots, this plugin's own persona still speaks" 'grep -q "paplay $root/sounds/timer-done.oga" "$calls" && [[ "$(jq -r .persona "$state/rang.json")" == "$me" ]]'
+expect "without roots, this plugin's own persona still speaks" 'grep -q "paplay $root/sounds/$(jq -r .userConfig.timerDoneSound.default "$root/.claude-plugin/plugin.json").oga" "$calls" && [[ "$(jq -r .persona "$state/rang.json")" == "$me" ]]'
 
 # A persona whose phrase list is empty falls back to the plain banner instead of failing
 echo '{"title": "Тайм-аут", "phrases": []}' > "$tmp/other/persona/breaks.json"

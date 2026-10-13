@@ -14,6 +14,81 @@
       "description": "How often the spinner moves to the next verb while a turn runs",
       "default": 30,
       "min": 10
+    },
+    "turnDoneSound": {
+      "type": "string",
+      "title": "Sound: answer ready",
+      "description": "Plays when Claude finishes a turn and nothing runs in the background",
+      "options": [
+        "damn-it",
+        "geralt-soitbegins",
+        "geralt-wtf",
+        "hmm",
+        "i-could-use-the-practice",
+        "if-you-don-t-shut-up",
+        "i-will-kill-you",
+        "lalala",
+        "level-up",
+        "loot",
+        "lullaby-of-woe",
+        "new-quest",
+        "quest-completed",
+        "quest-updated",
+        "she-fixed-it",
+        "something-to-think-about",
+        "you-learned-something"
+      ],
+      "default": "level-up"
+    },
+    "needsYouSound": {
+      "type": "string",
+      "title": "Sound: needs you",
+      "description": "Plays the moment Claude asks for a permission or a question",
+      "options": [
+        "damn-it",
+        "geralt-soitbegins",
+        "geralt-wtf",
+        "hmm",
+        "i-could-use-the-practice",
+        "if-you-don-t-shut-up",
+        "i-will-kill-you",
+        "lalala",
+        "level-up",
+        "loot",
+        "lullaby-of-woe",
+        "new-quest",
+        "quest-completed",
+        "quest-updated",
+        "she-fixed-it",
+        "something-to-think-about",
+        "you-learned-something"
+      ],
+      "default": "something-to-think-about"
+    },
+    "timerDoneSound": {
+      "type": "string",
+      "title": "Sound: break timer",
+      "description": "Plays when the /timer break reminder rings",
+      "options": [
+        "damn-it",
+        "geralt-soitbegins",
+        "geralt-wtf",
+        "hmm",
+        "i-could-use-the-practice",
+        "if-you-don-t-shut-up",
+        "i-will-kill-you",
+        "lalala",
+        "level-up",
+        "loot",
+        "lullaby-of-woe",
+        "new-quest",
+        "quest-completed",
+        "quest-updated",
+        "she-fixed-it",
+        "something-to-think-about",
+        "you-learned-something"
+      ],
+      "default": "lullaby-of-woe"
     }
   }
 }

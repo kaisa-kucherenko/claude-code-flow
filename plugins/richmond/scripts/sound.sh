@@ -5,6 +5,7 @@
 # A Stop that still lists in-flight background tasks (a subagent, a shell job)
 # stays silent: the session has only paused, the real end comes later.
 #
+# Which clip each moment plays is the user's pick, resolved by clip.sh.
 # Linux only: plays through PulseAudio/PipeWire with paplay.
 # CLAUDE_SOUND=off silences everything.
 [[ "${CLAUDE_SOUND:-on}" == "off" ]] && exit 0
@@ -28,7 +29,6 @@ if [[ -f "$active_file" ]]; then
     [[ "$(< "$active_file")" == "$me" ]] || exit 0
 fi
 
-clip="$root/sounds/$name.oga"
-[[ -f "$clip" ]] || exit 0
+clip="$(bash "$root/scripts/clip.sh" "$root" "$name")" || exit 0
 command -v paplay > /dev/null || exit 0
 paplay "$clip" 2> /dev/null &

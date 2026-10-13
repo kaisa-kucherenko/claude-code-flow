@@ -14,6 +14,72 @@
       "description": "How often the spinner moves to the next verb while a turn runs",
       "default": 30,
       "min": 10
+    },
+    "turnDoneSound": {
+      "type": "string",
+      "title": "Sound: answer ready",
+      "description": "Plays when Claude finishes a turn and nothing runs in the background",
+      "options": [
+        "bonfire-richmond-till-we-die",
+        "dani-football-is-death",
+        "dani-football-is-life",
+        "jamie-tartt-chant",
+        "keeley-well-done",
+        "na-na-dani-rojas",
+        "roy-fuck-no",
+        "roy-kent-chant",
+        "roy-lets-go-again",
+        "roy-okay-were-done",
+        "roy-whistle",
+        "so-long-farewell-v1",
+        "so-long-farewell-v2",
+        "ted-enough-for-today"
+      ],
+      "default": "roy-lets-go-again"
+    },
+    "needsYouSound": {
+      "type": "string",
+      "title": "Sound: needs you",
+      "description": "Plays the moment Claude asks for a permission or a question",
+      "options": [
+        "bonfire-richmond-till-we-die",
+        "dani-football-is-death",
+        "dani-football-is-life",
+        "jamie-tartt-chant",
+        "keeley-well-done",
+        "na-na-dani-rojas",
+        "roy-fuck-no",
+        "roy-kent-chant",
+        "roy-lets-go-again",
+        "roy-okay-were-done",
+        "roy-whistle",
+        "so-long-farewell-v1",
+        "so-long-farewell-v2",
+        "ted-enough-for-today"
+      ],
+      "default": "roy-fuck-no"
+    },
+    "timerDoneSound": {
+      "type": "string",
+      "title": "Sound: break timer",
+      "description": "Plays when the /timer break reminder rings",
+      "options": [
+        "bonfire-richmond-till-we-die",
+        "dani-football-is-death",
+        "dani-football-is-life",
+        "jamie-tartt-chant",
+        "keeley-well-done",
+        "na-na-dani-rojas",
+        "roy-fuck-no",
+        "roy-kent-chant",
+        "roy-lets-go-again",
+        "roy-okay-were-done",
+        "roy-whistle",
+        "so-long-farewell-v1",
+        "so-long-farewell-v2",
+        "ted-enough-for-today"
+      ],
+      "default": "ted-enough-for-today"
     }
   }
 }

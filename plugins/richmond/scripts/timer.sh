@@ -3,7 +3,7 @@
 # systemd counts the time, so the reminder rings once however many sessions are
 # open and whichever of them is in front. The persona on duty when it rings
 # speaks: its banner title, a phrase from persona/breaks.json and its
-# sounds/timer-done.oga; with no persona on, a plain banner and the desktop's
+# timer-done clip (scripts/clip.sh); with no persona on, a plain banner and the desktop's
 # alarm sound. It belongs to Claude Code, not to the desktop: the last session
 # to exit takes it down, and it stays silent if none is left when it is due.
 #   timer.sh set <45 | 45m | 1h>   start it, replacing a running one
@@ -132,7 +132,7 @@ fire)
     if (( count > 1 && pick == last )); then pick=$(( (pick + 1) % count )); fi
     put last-phrase "$pick"
     phrase="$(jq -r --argjson i "$pick" '.phrases[$i]' "$breaks")"
-    clip="$proot/sounds/timer-done.oga"
+    clip="$(bash "$proot/scripts/clip.sh" "$proot" timer-done)" || clip=""
   else
     persona=""
   fi

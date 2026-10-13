@@ -11,7 +11,7 @@ All the texts (HUD, spinner verbs, tips, status line, subagent panel) are in
 
 - **Linux.** Built and tested on Ubuntu 22.04 with GNOME Terminal 3.44 and
   Claude Code 2.1.296. The HUD needs Claude Code 2.1.287 or later (mods on by default).
-- `jq` for `/richmond` and the status lines (`sudo apt install jq`).
+- `jq` for `/richmond`, the status lines and the sounds (`sudo apt install jq`).
 - Sounds play through `paplay` (PulseAudio or PipeWire, default on Ubuntu).
   Without it the plugin stays silent.
 - The break timer (`/timer`) needs systemd's user manager (`systemd-run --user`)
@@ -41,13 +41,46 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 | Part | Comes with | What it shows |
 |------|-----------|---------------|
 | HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 % → penalties from 40 %). Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
-| Sounds | the plugin | Roy's "All right, let's go again!" when an answer is ready, Roy swearing the moment Claude asks for a permission or a question. `CLAUDE_SOUND=off` mutes both. |
+| Sounds | the plugin | Roy's "All right, let's go again!" when an answer is ready, Roy swearing the moment Claude asks for a permission or a question. Each moment takes any clip of the set; see below. |
 | Themes | the plugin | Nelson Road and Diamond Dogs, listed in `/theme`. |
 | Spinner verbs and tips | `/richmond` | 60 verbs and 95 tips in the characters' voices. A long turn moves to the next verb every 30 s; `/config richmond.spinnerSeconds=60` makes it 60. |
 | Status line | `/richmond` | `⚑ project  ВДОМА · main  [model \| effort]`. A working branch is an away game, and its score is commits ahead : behind. |
 | Subagent panel | `/richmond` | Agents as the squad and staff: Explore is the scout, Plan is the coach at the whiteboard. |
 | Terminal profile | `/richmond`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
 | Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
+
+## Sounds
+
+Three moments have a sound, and each takes any clip from `sounds/`:
+
+| Moment | Setting | Default |
+|--------|---------|---------|
+| An answer is ready, nothing left running in the background | `turnDoneSound` | `roy-lets-go-again` |
+| Claude asks for a permission or a question | `needsYouSound` | `roy-fuck-no` |
+| The break timer rings | `timerDoneSound` | `ted-enough-for-today` |
+
+Pick one in `/config` (it lists the clips), type
+`/config richmond.turnDoneSound=keeley-well-done`, or just tell Claude which clip you want
+where. `CLAUDE_SOUND=off` mutes all three.
+
+The clips:
+
+| Clip | What you hear |
+|------|---------------|
+| `roy-lets-go-again` | Roy: “All right, let's go again” |
+| `roy-fuck-no` | Roy: “Fuck no!” |
+| `ted-enough-for-today` | Ted: “I think that's enough for today”, then Roy whistles the team in |
+| `roy-okay-were-done` | Roy: “Okay, we're done” |
+| `roy-whistle` | Roy's whistle |
+| `roy-kent-chant` | The crowd: “Roy Kent! He's here, he's there…” |
+| `keeley-well-done` | Keeley: “Well done” |
+| `dani-football-is-life` | Dani before his penalty: “Football is life” |
+| `dani-football-is-death` | Dani: “Football is death!” |
+| `na-na-dani-rojas` | “Na-na-na…”, then “Dani Rojas” as he rejoins the team |
+| `jamie-tartt-chant` | The pub sings “Jamie Tartt, ta-da-da-da-da” |
+| `bonfire-richmond-till-we-die` | The team at the bonfire: “Richmond till we die” |
+| `so-long-farewell-v1` | The team's farewell song to Ted, the opening |
+| `so-long-farewell-v2` | The farewell song, “the sun has gone to bed” |
 
 ## Break timer
 
@@ -59,10 +92,10 @@ the desktop app's included; the band counts it down as «◷ Тайм-аут ч�
 When it is up you get a GNOME banner and a clip, and the band shows «◷ Тайм-аут»
 until your next prompt. Whichever persona is on duty at that moment speaks:
 Richmond titles the banner «Тайм-аут» with a line from `persona/breaks.json`,
-and Ted calls practice while Roy whistles the team in. With no persona on, the
-banner says “Time for a break” and the desktop's alarm plays; the countdown in
-the band shows only while a persona is on duty. `CLAUDE_SOUND=off` keeps the
-banner and mutes the clip.
+and Ted calls practice while Roy whistles the team in (or the clip you picked).
+With no persona on, the banner says “Time for a break” and the desktop's alarm
+plays; the countdown in the band shows only while a persona is on duty.
+`CLAUDE_SOUND=off` keeps the banner and mutes the clip.
 
 The timer belongs to Claude Code, not to your desktop: when the last session
 exits it is cancelled, and if none is left when it is due it stays silent.
@@ -106,7 +139,7 @@ plugin's own folder changes path with every update.
 claude plugin validate plugins/richmond
 claude plugin test plugins/richmond        # the HUD and the /richmond command
 bash plugins/richmond/tests/wear.test.sh   # wear.sh against a throwaway config
-bash plugins/richmond/tests/sound.test.sh  # which persona gets to play
+bash plugins/richmond/tests/sound.test.sh  # which persona plays, and which clip
 bash plugins/richmond/tests/timer.test.sh  # timer.sh with systemd and the banner stubbed
 ```
 
@@ -114,6 +147,5 @@ bash plugins/richmond/tests/timer.test.sh  # timer.sh with systemd and the banne
 
 An unofficial, non-commercial fan project. *Ted Lasso*, AFC Richmond and their
 characters belong to their rights holders (Apple TV+, Warner Bros. Television).
-The two event clips are under three seconds each; the break timer plays a
-16-second scene from season 3. If you hold the rights and want them out, open
-an issue.
+The clips are short excerpts: lines of a second or two, and chants and songs of
+up to 18 seconds. If you hold the rights and want them out, open an issue.

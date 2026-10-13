@@ -12,7 +12,7 @@ All the texts (HUD, spinner verbs, tips, status line, subagent panel) are in
 
 - **Linux.** Built and tested on Ubuntu 22.04 with GNOME Terminal 3.44 and
   Claude Code 2.1.296. The HUD needs Claude Code 2.1.287 or later (mods on by default).
-- `jq` for `/witcher` and the status lines (`sudo apt install jq`).
+- `jq` for `/witcher`, the status lines and the sounds (`sudo apt install jq`).
 - Sounds play through `paplay` (PulseAudio or PipeWire, default on Ubuntu).
   Without it the plugin stays silent.
 - The break timer (`/timer`) needs systemd's user manager (`systemd-run --user`)
@@ -42,13 +42,49 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the Path.
 | Part | Comes with | What it shows |
 |------|-----------|---------------|
 | HUD above the prompt | the plugin | Toxicity is the context % and carries a mark at 30 %, the point to hand the session off. Stamina is the 5-hour limit and vitality the 7-day limit, both draining like the game's bars. |
-| Sounds | the plugin | «You learned something» when an answer is ready, «Something to think about» the moment Claude asks for a permission or a question. `CLAUDE_SOUND=off` mutes both. |
+| Sounds | the plugin | The level-up chime when an answer is ready, «Something to think about» the moment Claude asks for a permission or a question. Each moment takes any clip of the set; see below. |
 | Themes | the plugin | Corvo Bianco and Kaer Morhen, listed in `/theme`. |
 | Spinner verbs and tips | `/witcher` | 55 verbs and 90 tips: lines from the books and in the characters' voices. A long turn moves to the next verb every 30 s; `/config witcher.spinnerSeconds=60` makes it 60. |
 | Status line | `/witcher` | `❖ project  ⚔ СРІБЛО · main  [model \| effort]`. A working branch takes the steel sword. |
 | Subagent panel | `/witcher` | Agents on a contract: Explore is the tracker, Plan the cartographer, a general-purpose agent a hired sword. |
 | Terminal profile | `/witcher`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
 | Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
+
+## Sounds
+
+Three moments have a sound, and each takes any clip from `sounds/`:
+
+| Moment | Setting | Default |
+|--------|---------|---------|
+| An answer is ready, nothing left running in the background | `turnDoneSound` | `level-up` |
+| Claude asks for a permission or a question | `needsYouSound` | `something-to-think-about` |
+| The break timer rings | `timerDoneSound` | `lullaby-of-woe` |
+
+Pick one in `/config` (it lists the clips), type
+`/config witcher.turnDoneSound=loot`, or just tell Claude which clip you want
+where. `CLAUDE_SOUND=off` mutes all three.
+
+The clips:
+
+| Clip | What you hear |
+|------|---------------|
+| `level-up` | The game's level-up chime |
+| `something-to-think-about` | “There's something to think about, folks” |
+| `lullaby-of-woe` | The song Lullaby of Woe |
+| `you-learned-something` | “You learned something, but not everything” |
+| `loot` | The game's loot pickup |
+| `new-quest` | The game's new-quest sound |
+| `quest-updated` | The game's quest-updated sound |
+| `quest-completed` | The game's quest-completed sound |
+| `geralt-soitbegins` | Geralt: “So it begins” |
+| `geralt-wtf` | Geralt: “What the fuck was that?” |
+| `hmm` | Geralt's “Hmm” |
+| `damn-it` | “Come on, damn it” |
+| `she-fixed-it` | “She fixed it” |
+| `i-could-use-the-practice` | “Try me, peasant. I could use the practice” |
+| `if-you-don-t-shut-up` | “And I'll take your tongue if you don't shut up” |
+| `i-will-kill-you` | “Challenge me again… look at me the wrong way, and I'll kill you” |
+| `lalala` | Music with a woman singing “la-la-la” |
 
 ## Break timer
 
@@ -60,7 +96,7 @@ the desktop app's included; the band counts it down as «☾ Медитація 
 When it is up you get a GNOME banner and a clip, and the band shows «☾ Час медитації»
 until your next prompt. Whichever persona is on duty at that moment speaks:
 the Witcher titles the banner «Час медитації» with a line from
-`persona/breaks.json`, and Lullaby of Woe plays. With no persona on, the banner
+`persona/breaks.json`, and Lullaby of Woe plays (or the clip you picked). With no persona on, the banner
 says “Time for a break” and the desktop's alarm plays; the countdown in the band
 shows only while a persona is on duty. `CLAUDE_SOUND=off` keeps the banner and
 mutes the clip.
@@ -107,7 +143,7 @@ plugin's own folder changes path with every update.
 claude plugin validate plugins/witcher
 claude plugin test plugins/witcher        # the HUD and the /witcher command
 bash plugins/witcher/tests/wear.test.sh   # wear.sh against a throwaway config
-bash plugins/witcher/tests/sound.test.sh  # which persona gets to play
+bash plugins/witcher/tests/sound.test.sh  # which persona plays, and which clip
 bash plugins/witcher/tests/timer.test.sh  # timer.sh with systemd and the banner stubbed
 ```
 
@@ -115,6 +151,6 @@ bash plugins/witcher/tests/timer.test.sh  # timer.sh with systemd and the banner
 
 An unofficial, non-commercial fan project, made under the CD PROJEKT RED Fan
 Content Guidelines. *The Witcher* and its characters belong to CD PROJEKT S.A.;
-the original books are by Andrzej Sapkowski. The two voice clips are under
-three seconds each; the break timer plays 14 seconds of Lullaby of Woe. If you
-hold the rights and want them out, open an issue.
+the original books are by Andrzej Sapkowski. The clips are short excerpts:
+voice lines and game sounds of a few seconds, the longest 14 seconds of
+Lullaby of Woe. If you hold the rights and want them out, open an issue.
