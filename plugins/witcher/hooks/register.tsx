@@ -2,6 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { Usage } from '../types'
+import { applyTimerFiles, formatLeft, isCounting, isExit, takeSeen, timerArgs, timerViewAt, TIMER_COMMAND } from './timer'
 
 // The game's HUD: toxicity climbs as the session drinks context, stamina
 // drains fast and comes back (the 5-hour window), vitality drains slowly (the
@@ -78,11 +79,50 @@ let stopWatching: (() => void) | undefined
 // neither can reach this module, so it polls the marker and redraws on change.
 const DUTY_POLL_MS = 3000
 
+// The break timer's state files, shared by every session and both personas
+async function timerDir($: Dollar): Promise<string | null> {
+  try {
+    const dir = (await $.env.get('CLAUDE_CONFIG_DIR')) ?? `${await $.env.get('HOME')}/.claude`
+    return `${dir}/persona-timer`
+  } catch {
+    return null
+  }
+}
+
+async function readOrNull($: Dollar, path: string): Promise<string | null> {
+  try {
+    return String(await $.fs.read(path))
+  } catch {
+    return null
+  }
+}
+
+async function refreshTimer($: Dollar): Promise<boolean> {
+  const dir = await timerDir($)
+  if (!dir) return false
+  return applyTimerFiles(
+    await readOrNull($, `${dir}/timer.json`),
+    await readOrNull($, `${dir}/rang.json`),
+    await readOrNull($, `${dir}/seen`),
+  )
+}
+
+async function runTimer($: Dollar, args: string): Promise<string> {
+  const r = await $.process
+    .run(['bash', `${$.plugin.root}/scripts/timer.sh`, ...timerArgs(args)])
+    .catch((err: unknown) => ({ exitCode: -1, stdout: '', stderr: String(err) }))
+  return (r.exitCode === 0 ? r.stdout : r.stderr).trim()
+}
+
 async function recheckDuty($: Dollar) {
+  const timerChanged = await refreshTimer($)
   const now = await isOnDuty($)
-  if (now === undefined || now === onDuty) return
-  onDuty = now
-  $.ui.invalidate('ui.render')
+  if (now !== undefined && now !== onDuty) {
+    onDuty = now
+    $.ui.invalidate('ui.render')
+  } else if (timerChanged && onDuty) {
+    $.ui.invalidate('ui.render')
+  }
 }
 
 // The engine samples the spinner word from the verbs it read at session start,
@@ -127,6 +167,8 @@ async function stepsSince($: Dollar, word: string, stepMs: number): Promise<numb
 
 // Redraws often enough that a step lands within a few seconds of falling due
 const SPINNER_TICK_MS = 5000
+// The break countdown shows seconds
+const TIMER_TICK_MS = 1000
 
 // Wearing the persona rewrites the person's own settings, so it is a command
 // they run, never a side effect of installing the plugin. wear.sh owns the
@@ -148,6 +190,14 @@ export const register: Register = (on, options) => {
       description: 'Put on The Witcher 3 persona: theme, spinner, status line, terminal profile',
       argumentHint: '[corvo-bianco | kaer-morhen | off]',
     })
+    // Both persona plugins carry /timer and the first to start owns it; the
+    // other's refusal must not cost it the rest of its start
+    await $.command.register(TIMER_COMMAND).catch(() => undefined)
+    // The persona on duty when the timer rings may not be the plugin that set
+    // it, so each plugin says where its phrases and clip live
+    const dir = await timerDir($)
+    if (dir) await $.fs.write(`${dir}/roots/witcher`, $.plugin.root).catch(() => undefined)
+    await refreshTimer($)
     onDuty = (await isOnDuty($)) ?? true
     // Each session start re-arms the poll with its own `$`
     stopWatching?.()
@@ -155,9 +205,13 @@ export const register: Register = (on, options) => {
     const tick = $.clock.every(SPINNER_TICK_MS, () => {
       if (onDuty) $.ui.invalidate('ui.render')
     })
+    const countdown = $.clock.every(TIMER_TICK_MS, async () => {
+      if (onDuty && isCounting(await $.clock.now())) $.ui.invalidate('ui.render')
+    })
     stopWatching = () => {
       duty.cancel()
       tick.cancel()
+      countdown.cancel()
     }
     await loadVerbs($)
     await refreshUsage($)
@@ -168,6 +222,32 @@ export const register: Register = (on, options) => {
     const text = await wear($, e.args)
     await recheckDuty($)
     return { text }
+  })
+
+  on('command.run', { command: 'timer' }, async ($, e) => {
+    const text = await runTimer($, e.args)
+    await refreshTimer($)
+    $.ui.invalidate('ui.render')
+    return { text }
+  })
+
+  on('prompt.submit', async ($, e, next) => {
+    const id = takeSeen()
+    if (id) {
+      const dir = await timerDir($)
+      if (dir) await $.fs.write(`${dir}/seen`, id).catch(() => undefined)
+      if (onDuty) $.ui.invalidate('ui.render')
+    }
+    return next(e)
+  })
+
+  on('session.end', async ($, e, next) => {
+    if (isExit(e.reason)) {
+      // Every exit hook shares one short bound, so reap takes what is left of it
+      const timeoutMs = Math.max(200, Math.floor(next.budget.remainingMs))
+      await $.process.run(['bash', `${$.plugin.root}/scripts/timer.sh`, 'reap'], { timeoutMs }).catch(() => undefined)
+    }
+    return next(e)
   })
 
   on('session.measure', async ($, e, next) => {
@@ -205,6 +285,7 @@ export const register: Register = (on, options) => {
     // like /usage (how much is spent), tagged ctx / 5h / 7d so it cannot be
     // mistaken for what is left.
     const leftColor = (used: number) => (used >= 90 ? 'error' : used >= 70 ? 'warning' : 'success')
+    const rest = timerViewAt(await $.clock.now())
 
     return (
       <Box flexDirection="column" marginTop={1}>
@@ -235,6 +316,19 @@ export const register: Register = (on, options) => {
               <Text color={leftColor(u.sevenDay)}>{bar(100 - u.sevenDay, w)}</Text>
               <Text dimColor> 7d </Text>
               <Text color={leftColor(u.sevenDay)}>{u.sevenDay}%</Text>
+            </Text>
+          ) : null}
+          {rest.kind === 'counting' ? (
+            <Text>
+              <Text dimColor>   </Text>
+              <Text color="claude">☾ </Text>
+              <Text dimColor>{label('Медитація через ', '')}</Text>
+              <Text color="claude">{formatLeft(rest.leftMs)}</Text>
+            </Text>
+          ) : rest.kind === 'rang' ? (
+            <Text>
+              <Text dimColor>   </Text>
+              <Text color="claude" bold>☾ Час медитації</Text>
             </Text>
           ) : null}
         </Box>

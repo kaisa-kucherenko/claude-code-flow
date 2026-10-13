@@ -15,6 +15,8 @@ All the texts (HUD, spinner verbs, tips, status line, subagent panel) are in
 - `jq` for `/witcher` and the status lines (`sudo apt install jq`).
 - Sounds play through `paplay` (PulseAudio or PipeWire, default on Ubuntu).
   Without it the plugin stays silent.
+- The break timer (`/timer`) needs systemd's user manager (`systemd-run --user`)
+  and `notify-send` for the banner; both ship with Ubuntu's desktop.
 - The terminal profile is for GNOME Terminal. Where it isn't installed,
   `/witcher` skips it. The colours are in `persona/terminal/*.dconf`, so you can
   copy them into your own terminal.
@@ -46,6 +48,27 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the Path.
 | Status line | `/witcher` | `❖ project  ⚔ СРІБЛО · main  [model \| effort]`. A working branch takes the steel sword. |
 | Subagent panel | `/witcher` | Agents on a contract: Explore is the tracker, Plan the cartographer, a general-purpose agent a hired sword. |
 | Terminal profile | `/witcher`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
+| Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
+
+## Break timer
+
+`/timer 45m` (or `45`, `1h`) reminds you to take a break once that time is up.
+`/timer` alone says how long is left, `/timer off` cancels it, and a new time
+replaces the running one. One timer serves every open Claude Code session,
+the desktop app's included; the band counts it down as «☾ Медитація через 32:10».
+
+When it is up you get a GNOME banner and a clip, and the band shows «☾ Час медитації»
+until your next prompt. Whichever persona is on duty at that moment speaks:
+the Witcher titles the banner «Час медитації» with a line from
+`persona/breaks.json`, and Lullaby of Woe plays. With no persona on, the banner
+says “Time for a break” and the desktop's alarm plays; the countdown in the band
+shows only while a persona is on duty. `CLAUDE_SOUND=off` keeps the banner and
+mutes the clip.
+
+The timer belongs to Claude Code, not to your desktop: when the last session
+exits it is cancelled, and if none is left when it is due it stays silent.
+systemd counts the time (a transient unit, `claude-persona-timer`), so it rings
+once however many sessions are open.
 
 ## Switching personas
 
@@ -85,6 +108,7 @@ claude plugin validate plugins/witcher
 claude plugin test plugins/witcher        # the HUD and the /witcher command
 bash plugins/witcher/tests/wear.test.sh   # wear.sh against a throwaway config
 bash plugins/witcher/tests/sound.test.sh  # which persona gets to play
+bash plugins/witcher/tests/timer.test.sh  # timer.sh with systemd and the banner stubbed
 ```
 
 ## Rights
@@ -92,4 +116,5 @@ bash plugins/witcher/tests/sound.test.sh  # which persona gets to play
 An unofficial, non-commercial fan project, made under the CD PROJEKT RED Fan
 Content Guidelines. *The Witcher* and its characters belong to CD PROJEKT S.A.;
 the original books are by Andrzej Sapkowski. The two voice clips are under
-three seconds each. If you hold the rights and want them out, open an issue.
+three seconds each; the break timer plays 14 seconds of Lullaby of Woe. If you
+hold the rights and want them out, open an issue.

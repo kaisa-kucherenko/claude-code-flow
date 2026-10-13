@@ -232,3 +232,143 @@ test('spinnerSeconds sets how often the verb moves on', { options: { spinnerSeco
   await clock.advance(30000)
   expect((await line.find({ type: 'Text' }))?.text).toBe(OWN[1])
 })
+
+// The break timer: timer.sh keeps its state in persona-timer/, the band reads it
+const TIMER_DIR = '/home/fan/.claude/persona-timer'
+
+async function mountTimer($: any, on: any, files: Record<string, string>, opts: { columns?: number; active?: string; timerOwnedElsewhere?: boolean } = {}) {
+  const written: Record<string, string> = {}
+  on('ui.render', { component: 'AbovePrompt' }, ($: any, e: any) => $.ui.resolve(e).Text({ children: 'engine band' }))
+  on('env.get', (_$: any, e: any) => ({ value: e.name === 'HOME' ? '/home/fan' : undefined }))
+  on('fs.read', (_$: any, e: any) => {
+    if (e.path === '/home/fan/.claude/personas/active') return { value: `${opts.active ?? 'richmond'}\n` }
+    const name = e.path.startsWith(`${TIMER_DIR}/`) ? e.path.slice(TIMER_DIR.length + 1) : ''
+    if (name in files) return { value: files[name] }
+    throw new Error('ENOENT')
+  })
+  on('fs.write', (_$: any, e: any) => {
+    written[e.path] = e.text
+    if (e.path.startsWith(`${TIMER_DIR}/`)) files[e.path.slice(TIMER_DIR.length + 1)] = e.text
+    return { value: undefined }
+  })
+  on('session.usage', () => ({ value: { startedAt: 0, context: { window: 200000, percent: 12 }, rateLimits: [] } }))
+  on('command.register', (_$: any, e: any) => {
+    if (opts.timerOwnedElsewhere && e.name === 'timer') throw new Error('"/timer" refused: the plugin other registered it already')
+    return { value: { command: e.name } }
+  })
+  on('session.start', (_$: any, e: any) => ({ cwd: e.cwd }))
+  on('prompt.submit', (_$: any, e: any) => ({ text: e.text }))
+  on('session.end', (_$: any, e: any) => ({ sessionId: e.sessionId }))
+  clock = mock.clock(on)
+  await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+  const band = await $.ui.mount({
+    plugin: 'richmond', surface: 'terminal', component: 'AbovePrompt',
+    props: { hasSurvey: false, isWorking: false, maxRows: 6, bodyColumns: opts.columns ?? 160, scroll: { offset: 0, bodyRows: 5 }, view: {} },
+  })
+  return { band, written, files }
+}
+
+// The mocked clock starts at 0, so a timer due in N seconds ends at N * 1000
+const endsIn = (seconds: number) => JSON.stringify({ id: 't1', minutes: 45, endsAt: seconds * 1000 })
+
+test('a running timer counts down in the band, labelled as still to come', async ($, on) => {
+  const { band } = await mountTimer($, on, { 'timer.json': endsIn(32 * 60 + 10) })
+  expect(await band.find({ text: /Тайм-аут через/ })).toBeDefined()
+  expect(await band.find({ text: /^32:10$/ })).toBeDefined()
+  await clock.advance(1000)
+  expect(await band.find({ text: /^32:09$/ })).toBeDefined()
+})
+
+test('an hour or more reads with hours', async ($, on) => {
+  const { band } = await mountTimer($, on, { 'timer.json': endsIn(3600 + 5 * 60) })
+  expect(await band.find({ text: /^1:0[45]:\d\d$/ })).toBeDefined()
+})
+
+test('a narrow band keeps the countdown and drops the words', async ($, on) => {
+  const { band } = await mountTimer($, on, { 'timer.json': endsIn(600) }, { columns: 80 })
+  expect(await band.find({ text: /Тайм-аут через/ })).toBeUndefined()
+  expect(await band.find({ text: /^(10:00|9:5\d)$/ })).toBeDefined()
+})
+
+test('a timer set in another session shows up within a few seconds', async ($, on) => {
+  const { band, files } = await mountTimer($, on, {})
+  expect(await band.find({ text: /Тайм-аут/ })).toBeUndefined()
+  files['timer.json'] = endsIn(600)
+  await clock.advance(3000)
+  expect(await band.find({ text: /Тайм-аут через/ })).toBeDefined()
+})
+
+test('once it rang, the band says so until the next prompt, then lets it go everywhere', async ($, on) => {
+  const { band, written } = await mountTimer($, on, { 'rang.json': JSON.stringify({ id: 't1', persona: 'richmond' }) })
+  expect(await band.find({ text: /^◷ Тайм-аут$/ })).toBeDefined()
+  await $.prompt.submit({ text: 'я тут' } as any)
+  expect(written[`${TIMER_DIR}/seen`]).toBe('t1')
+  expect(await band.find({ text: /^◷ Тайм-аут$/ })).toBeUndefined()
+})
+
+test('a reminder already seen in another session stays down', async ($, on) => {
+  const { band } = await mountTimer($, on, { 'rang.json': JSON.stringify({ id: 't1' }), seen: 't1\n' })
+  expect(await band.find({ text: /^◷ Тайм-аут$/ })).toBeUndefined()
+})
+
+test('off duty, the timer is not drawn either', async ($, on) => {
+  const { band } = await mountTimer($, on, { 'timer.json': endsIn(600) }, { active: 'witcher' })
+  expect(await band.find({ text: /Тайм-аут/ })).toBeUndefined()
+})
+
+test('each session leaves this plugin\'s path for whichever persona rings', async ($, on) => {
+  const { written } = await mountTimer($, on, {})
+  expect(written[`${TIMER_DIR}/roots/richmond`]).toMatch(/\/richmond$/)
+})
+
+const runTimerCmd = async ($: any, args: string): Promise<string> => (await $.command.run({ command: 'timer', args })).text ?? ''
+
+test('/timer hands its argument to timer.sh: set, status with none, off as is', async ($, on) => {
+  const calls = fakeWear(on, { exitCode: 0, stdout: 'Timer set for 45m. Rings at 08:55.\n', stderr: '' })
+  await mountTimer($, on, {})
+  expect(await runTimerCmd($, ' 45m ')).toBe('Timer set for 45m. Rings at 08:55.')
+  await runTimerCmd($, '')
+  await runTimerCmd($, 'off')
+  expect(calls.map(c => c.slice(1))).toEqual([
+    [expect.stringMatching(/\/scripts\/timer\.sh$/), 'set', '45m'],
+    [expect.stringMatching(/\/scripts\/timer\.sh$/), 'status'],
+    [expect.stringMatching(/\/scripts\/timer\.sh$/), 'off'],
+  ])
+})
+
+test('a refused /timer shows timer.sh\'s own message', async ($, on) => {
+  fakeWear(on, { exitCode: 1, stdout: '', stderr: 'Use whole minutes or hours: /timer 45, /timer 90m, /timer 2h.\n' })
+  await mountTimer($, on, {})
+  expect(await runTimerCmd($, '1h30m')).toBe('Use whole minutes or hours: /timer 45, /timer 90m, /timer 2h.')
+})
+
+test('leaving the session asks timer.sh to reap; a /clear does not', async ($, on) => {
+  const calls = fakeWear(on)
+  await mountTimer($, on, {})
+  await $.session.end({ reason: 'clear', sessionId: 's1', resume: { id: 's1' } })
+  expect(calls.some(c => c.includes('reap'))).toBe(false)
+  await $.session.end({ reason: 'prompt_input_exit', sessionId: 's1', resume: { id: 's1' } })
+  expect(calls.filter(c => c.includes('reap')).length).toBe(1)
+})
+
+test('with the other persona already owning /timer, the band still counts down', async ($, on) => {
+  const { band, written } = await mountTimer($, on, { 'timer.json': endsIn(600) }, { timerOwnedElsewhere: true })
+  expect(written[`${TIMER_DIR}/roots/richmond`]).toBeDefined()
+  expect(await band.find({ text: /^10:00$/ })).toBeDefined()
+  await clock.advance(1000)
+  expect(await band.find({ text: /^9:59$/ })).toBeDefined()
+  expect(await band.find({ text: /Тайм-аут через/ })).toBeDefined()
+})
+
+test('a timer left behind long past its end (a reboot, a killed session) is not drawn', async ($, on) => {
+  const { band } = await mountTimer($, on, { 'timer.json': endsIn(-120) })
+  expect(await band.find({ text: /Тайм-аут/ })).toBeUndefined()
+  expect(await band.find({ text: /^0:00$/ })).toBeUndefined()
+})
+
+test('/timer OFF cancels like off', async ($, on) => {
+  const calls = fakeWear(on)
+  await mountTimer($, on, {})
+  await runTimerCmd($, 'OFF')
+  expect(calls[0]?.slice(2)).toEqual(['off'])
+})
