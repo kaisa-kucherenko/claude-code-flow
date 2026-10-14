@@ -15,6 +15,14 @@
       "default": 30,
       "min": 10
     },
+    "toxicityThreshold": {
+      "type": "number",
+      "title": "Extra time, % of context",
+      "description": "Where regular time ends and extra time starts, the line to hand the session off; penalties start 10 points past it",
+      "default": 30,
+      "min": 5,
+      "max": 90
+    },
     "breakScreen": {
       "type": "string",
       "title": "Break screen size",

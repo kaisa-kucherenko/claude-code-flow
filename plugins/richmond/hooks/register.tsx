@@ -19,9 +19,10 @@ const usage = atom({ plugin: 'richmond', key: 'usage' } as const, {
 
 // The match follows a session that is handed off to a fresh one between 30 and
 // 40 % of context: regular time ends at 30, extra time at 40, then penalties.
-const HALF_TIME = 15
-const FULL_TIME = 30
-const EXTRA_TIME = 40
+// Where to hand off is a habit, not a law, so `toxicityThreshold` moves full time.
+const DEFAULT_FULL_TIME = 30
+// Extra time lasts this long past full time; the shoot-out starts after it.
+const EXTRA_TIME_LENGTH = 10
 
 // The sign's canonical look: yellow capitals on a royal-blue board.
 const SIGN_BLUE = '#2F4BB0'
@@ -33,14 +34,16 @@ type Phase = { label: string; kicks?: string; tone: 'text' | 'warning' | 'error'
 
 // Context percent → match phase. One number on the band is enough: the percent
 // is what the handoff decision is made on, the phase says how late it is.
-export function phase(ctx: number): Phase {
+export function phase(ctx: number, fullTime = DEFAULT_FULL_TIME): Phase {
+  const extraTime = fullTime + EXTRA_TIME_LENGTH
   if (ctx <= 0) return { label: 'Стартовий свисток', tone: 'text' }
-  if (ctx < HALF_TIME) return { label: '1-й тайм', tone: 'text' }
-  if (ctx < FULL_TIME) return { label: '2-й тайм', tone: 'text' }
-  if (ctx < EXTRA_TIME) return { label: 'Додатковий час', tone: 'warning' }
+  // Two equal halves, so half time moves with full time
+  if (ctx < fullTime / 2) return { label: '1-й тайм', tone: 'text' }
+  if (ctx < fullTime) return { label: '2-й тайм', tone: 'text' }
+  if (ctx < extraTime) return { label: 'Додатковий час', tone: 'warning' }
   // One kick every two percent; after the fifth the shoot-out just goes on,
   // kick by kick, the way a real one does.
-  const kicks = Math.floor((ctx - EXTRA_TIME) / 2)
+  const kicks = Math.floor((ctx - extraTime) / 2)
   if (kicks <= 5) return { label: 'Серія пенальті', kicks: '●'.repeat(kicks) + '◯'.repeat(5 - kicks), tone: 'error' }
   return { label: 'Серія пенальті', kicks: `●●●●● +${kicks - 5}`, tone: 'error' }
 }
@@ -209,6 +212,8 @@ async function wear($: Dollar, args: string): Promise<string> {
 
 export const register: Register = (on, options) => {
   const stepMs = Math.max(10, Number(options.spinnerSeconds) || 30) * 1000
+  // Same bounds as toxicityThreshold in plugin.json; the clamp covers a value the host saved unchecked
+  const fullTime = Math.min(90, Math.max(5, Number(options.toxicityThreshold) || DEFAULT_FULL_TIME))
 
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -307,7 +312,7 @@ export const register: Register = (on, options) => {
     const rest = timerViewAt(await $.clock.now())
 
     const ctx = u.ctx ?? 0
-    const match = phase(ctx)
+    const match = phase(ctx, fullTime)
 
     const balls = u.fiveHour !== null ? unitsLeft(u.fiveHour, 5) : 0
     const letters = u.sevenDay !== null ? unitsLeft(u.sevenDay, 7) : 7

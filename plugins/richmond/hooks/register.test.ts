@@ -96,6 +96,21 @@ test('past 40 % the match goes to penalties, one kick per two percent', async ($
   expect(await band.find({ text: /Серія пенальті/ })).toBeDefined()
 })
 
+test('toxicityThreshold moves full time and extra time with it', { options: { toxicityThreshold: 50 } }, async ($, on) => {
+  // 34 % is extra time by default but still the second half of a match that ends at 50
+  const band = await mount($, on, { context: { window: 200000, percent: 34 } })
+  expect(await band.find({ text: /2-й тайм/ })).toBeDefined()
+  expect(await band.find({ text: /Додатковий час/ })).toBeUndefined()
+})
+
+test('penalties count from the moved full time, not from the default one', { options: { toxicityThreshold: 50 } }, async ($, on) => {
+  // 55 % is past the default's shoot-out (40) but only 5 into extra time after 50
+  const band = await mount($, on, { context: { window: 200000, percent: 55 } })
+  const label = await band.findAll({ type: 'Text', text: /Додатковий час/ })
+  expect(label.some((t: T) => t.props.color === 'warning')).toBe(true)
+  expect(await band.find({ text: /Серія пенальті/ })).toBeUndefined()
+})
+
 test('a spent week tears the sign', async ($, on) => {
   const band = await mount($, on, {
     context: { window: 200000, percent: 5 },

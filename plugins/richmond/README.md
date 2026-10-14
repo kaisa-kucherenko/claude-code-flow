@@ -42,7 +42,7 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 
 | Part | Comes with | What it shows |
 |------|-----------|---------------|
-| HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 % → penalties from 40 %). Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
+| HUD above the prompt | the plugin | The session as a match: context % is the match clock (1st half → 2nd half → extra time at 30 %, the point to hand the session off → penalties from 40 %); `/config richmond.toxicityThreshold=40` moves extra time to your own, and penalties follow 10 points later. Five balls for the 5-hour limit, the BELIEVE sign for the 7-day limit, one letter per day. |
 | Sounds | the plugin | Roy's "All right, let's go again!" when an answer is ready, Roy swearing the moment Claude asks for a permission or a question. Each moment takes any clip of the set; see below. |
 | Themes | the plugin | Nelson Road and Diamond Dogs, listed in `/theme`. |
 | Spinner verbs and tips | `/richmond` | 60 verbs and 77 tips in the characters' voices. A long turn moves to the next verb every 30 s; `/config richmond.spinnerSeconds=60` makes it 60. |
