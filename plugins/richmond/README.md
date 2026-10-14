@@ -15,7 +15,9 @@ All the texts (HUD, spinner verbs, tips, status line, subagent panel) are in
 - Sounds play through `paplay` (PulseAudio or PipeWire, default on Ubuntu).
   Without it the plugin stays silent.
 - The break timer (`/timer`) needs systemd's user manager (`systemd-run --user`)
-  and `notify-send` for the banner; both ship with Ubuntu's desktop.
+  and, for its break screen, an X11 session (Wayland works through XWayland) and
+  GTK 3 with PyGObject under `/usr/bin/python3`: `sudo apt install python3-gi python3-gi-cairo`
+  if they are missing.
 - The terminal profile is for GNOME Terminal. Where it isn't installed,
   `/richmond` skips it. The colours are in `persona/terminal/*.dconf`, so you can
   copy them into your own terminal.
@@ -47,7 +49,7 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the pitch.
 | Status line | `/richmond` | `⚑ project  ВДОМА · main  [model \| effort]`. A working branch is an away game, and its score is commits ahead : behind. |
 | Subagent panel | `/richmond` | Agents as the squad and staff, three lines each: Explore is the scout, Plan is Beard at the whiteboard. |
 | Terminal profile | `/richmond`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
-| Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
+| Break timer | the plugin | `/timer 45m` counts down in the band and rings with a break screen; see below. |
 
 ## Sounds
 
@@ -89,16 +91,25 @@ The clips:
 replaces the running one. One timer serves every open Claude Code session,
 the desktop app's included; the band counts it down as «◷ Тайм-аут через 32:10».
 
-When it is up you get a GNOME banner and a clip, and the band shows «◷ Тайм-аут»
-until your next prompt. Whichever persona is on duty at that moment speaks:
-Richmond titles the banner «Тайм-аут» with a line from `persona/breaks.json`,
-and Ted calls practice while Roy whistles the team in (or the clip you picked).
-With no persona on, the banner says “Time for a break” and the desktop's alarm
-plays; the countdown in the band shows only while a persona is on duty.
-`CLAUDE_SOUND=off` keeps the banner and mutes the clip.
+When it is up a break screen opens over your work, Ted calls practice while Roy
+whistles the team in (or the clip you picked), and the band shows «◷ Тайм-аут»
+until your next prompt. The screen carries «ТАЙМ-АУТ», a line from
+`persona/breaks.json` and one of the GIFs in `persona/breaks/`, in the Nelson Road
+navy and gold (`screen` in the same file). Its «Назад на поле» button unlocks
+after 10 seconds, so an Enter typed mid-sentence cannot dismiss it unseen; Esc
+works from then on too.
+
+It opens as an 800×520 window in the middle of the main monitor;
+`/config richmond.breakScreen=fullscreen` covers every monitor instead.
+Whichever persona is on duty at that moment speaks, and a persona without a
+break screen, or a screen that fails to open, rings with a GNOME banner. With no
+persona on, the banner says “Time for a break” and the desktop's alarm plays;
+the countdown in the band shows only while a persona is on duty.
+`CLAUDE_SOUND=off` mutes the clip.
 
 The timer belongs to Claude Code, not to your desktop: when the last session
 exits it is cancelled, and if none is left when it is due it stays silent.
+A new `/timer` or the last session exiting also closes a break screen still open.
 systemd counts the time (a transient unit, `claude-persona-timer`), so it rings
 once however many sessions are open.
 
@@ -140,7 +151,7 @@ claude plugin validate plugins/richmond
 claude plugin test plugins/richmond        # the HUD and the /richmond command
 bash plugins/richmond/tests/wear.test.sh   # wear.sh against a throwaway config
 bash plugins/richmond/tests/sound.test.sh  # which persona plays, and which clip
-bash plugins/richmond/tests/timer.test.sh  # timer.sh with systemd and the banner stubbed
+bash plugins/richmond/tests/timer.test.sh  # timer.sh with systemd, the banner and the break screen stubbed
 ```
 
 ## Rights
@@ -148,4 +159,10 @@ bash plugins/richmond/tests/timer.test.sh  # timer.sh with systemd and the banne
 An unofficial, non-commercial fan project. *Ted Lasso*, AFC Richmond and their
 characters belong to their rights holders (Apple TV+, Warner Bros. Television).
 The clips are short excerpts: lines of a second or two, and chants and songs of
-up to 18 seconds. If you hold the rights and want them out, open an issue.
+up to 18 seconds. The break-screen GIFs in `persona/breaks/` are short loops of
+scenes from the series, taken from Tenor. If you hold the rights and want them
+out, open an issue.
+
+The break screen is set in Fira Sans and Fira Sans Extra Condensed by the
+Mozilla Foundation and Telefonica S.A., under the SIL Open Font License 1.1
+(`fonts/OFL.txt`); the three files are the unmodified static fonts from Google Fonts.

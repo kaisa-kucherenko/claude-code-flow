@@ -15,6 +15,13 @@
       "default": 30,
       "min": 10
     },
+    "breakScreen": {
+      "type": "string",
+      "title": "Break screen size",
+      "description": "How the /timer break screen opens: a window in the middle of the main monitor, or every monitor covered",
+      "options": ["window", "fullscreen"],
+      "default": "window"
+    },
     "turnDoneSound": {
       "type": "string",
       "title": "Sound: answer ready",
