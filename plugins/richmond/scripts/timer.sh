@@ -2,10 +2,11 @@
 # A one-shot break reminder for every open Claude Code session: /timer 45m.
 # systemd counts the time, so the reminder rings once however many sessions are
 # open and whichever of them is in front. The persona on duty when it rings
-# speaks: its banner title, a phrase from persona/breaks.json and its
-# timer-done clip (scripts/clip.sh); with no persona on, a plain banner and the desktop's
-# alarm sound. It belongs to Claude Code, not to the desktop: the last session
-# to exit takes it down, and it stays silent if none is left when it is due.
+# speaks: its title, a phrase from persona/breaks.json and its timer-done clip
+# (scripts/clip.sh), on its break screen (scripts/break.py) or, without one, a
+# banner; with no persona on, a plain banner and the desktop's alarm sound. It
+# belongs to Claude Code, not to the desktop: the last session to exit takes it
+# down, and it stays silent if none is left when it is due.
 #   timer.sh set <45 | 45m | 1h>   start it, replacing a running one
 #   timer.sh status
 #   timer.sh off
@@ -137,12 +138,22 @@ fire)
     persona=""
   fi
   put rang.json "$(jq -cn --arg id "$2" --arg p "$persona" --arg t "$title" --arg ph "$phrase" '{id: $id, persona: $p, title: $t, phrase: $ph}')"
-  # The clip runs for seconds; a /timer typed meanwhile should not wait on it
+  # The clip and the break screen run for a while; a /timer typed meanwhile should not wait on them
   exec 9>&-
-  notify-send --app-name="Claude Code" "$title" "$phrase" 2> /dev/null || true
   if [[ "${CLAUDE_SOUND:-on}" != off && -f "$clip" ]] && command -v paplay > /dev/null; then
-    paplay "$clip" 2> /dev/null || true
+    paplay "$clip" 2> /dev/null &
   fi
+  # A persona with a break screen shows it instead of the banner. It stays in the
+  # foreground: systemd kills what is left of the unit once this script exits.
+  # A screen that fails to start still rings with the banner, and its error lands
+  # in the unit's journal
+  if [[ -n "$persona" && -x "$proot/scripts/break.py" ]]; then
+    "$proot/scripts/break.py" "$proot" "$title" "$phrase" \
+      || notify-send --app-name="Claude Code" "$title" "$phrase" 2> /dev/null || true
+  else
+    notify-send --app-name="Claude Code" "$title" "$phrase" 2> /dev/null || true
+  fi
+  wait || true
   ;;
 *) echo "usage: timer.sh set <45 | 45m | 1h> | status | off | reap | fire <id>" >&2; exit 1 ;;
 esac

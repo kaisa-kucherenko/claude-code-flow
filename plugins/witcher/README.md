@@ -16,7 +16,9 @@ All the texts (HUD, spinner verbs, tips, status line, subagent panel) are in
 - Sounds play through `paplay` (PulseAudio or PipeWire, default on Ubuntu).
   Without it the plugin stays silent.
 - The break timer (`/timer`) needs systemd's user manager (`systemd-run --user`)
-  and `notify-send` for the banner; both ship with Ubuntu's desktop.
+  and, for its break screen, an X11 session (Wayland works through XWayland) and
+  GTK 3 with PyGObject under `/usr/bin/python3`: `sudo apt install python3-gi python3-gi-cairo`
+  if they are missing.
 - The terminal profile is for GNOME Terminal. Where it isn't installed,
   `/witcher` skips it. The colours are in `persona/terminal/*.dconf`, so you can
   copy them into your own terminal.
@@ -48,7 +50,7 @@ Restart Claude Code (`/exit`, then `claude -c`) and you're on the Path.
 | Status line | `/witcher` | `❖ project  ⚔ СРІБЛО · main  [model \| effort]`. A working branch takes the steel sword. |
 | Subagent panel | `/witcher` | Agents on a contract, three lines each: Explore follows its witcher senses, Plan is Vesemir at the map, a general-purpose agent a hired sword. |
 | Terminal profile | `/witcher`, GNOME Terminal | Background, palette and cursor for new tabs; your font stays. |
-| Break timer | the plugin | `/timer 45m` counts down in the band and rings with a banner; see below. |
+| Break timer | the plugin | `/timer 45m` counts down in the band and rings with a break screen; see below. |
 
 ## Sounds
 
@@ -93,16 +95,23 @@ The clips:
 replaces the running one. One timer serves every open Claude Code session,
 the desktop app's included; the band counts it down as «☾ Медитація через 32:10».
 
-When it is up you get a GNOME banner and a clip, and the band shows «☾ Час медитації»
-until your next prompt. Whichever persona is on duty at that moment speaks:
-the Witcher titles the banner «Час медитації» with a line from
-`persona/breaks.json`, and Lullaby of Woe plays (or the clip you picked). With no persona on, the banner
-says “Time for a break” and the desktop's alarm plays; the countdown in the band
-shows only while a persona is on duty. `CLAUDE_SOUND=off` keeps the banner and
-mutes the clip.
+When it is up a break screen opens over your work, Lullaby of Woe plays (or the
+clip you picked), and the band shows «☾ Час медитації» until your next prompt.
+The screen carries «Час медитації», a line from `persona/breaks.json` and one
+of the GIFs in `persona/breaks/`, in the Corvo Bianco colours (`screen` in the
+same file). Its «Повертаюсь» button unlocks after 10 seconds, so an Enter typed
+mid-sentence cannot dismiss it unseen; Esc works from then on too.
+
+It opens as an 800×500 window in the middle of the main monitor;
+`/config witcher.breakScreen=fullscreen` covers every monitor instead.
+Whichever persona is on duty at that moment speaks, and a persona without a
+break screen, or a screen that fails to open, rings with a GNOME banner. With no persona on, the banner says
+“Time for a break” and the desktop's alarm plays; the countdown in the band
+shows only while a persona is on duty. `CLAUDE_SOUND=off` mutes the clip.
 
 The timer belongs to Claude Code, not to your desktop: when the last session
 exits it is cancelled, and if none is left when it is due it stays silent.
+A new `/timer` or the last session exiting also closes a break screen still open.
 systemd counts the time (a transient unit, `claude-persona-timer`), so it rings
 once however many sessions are open.
 
@@ -144,7 +153,7 @@ claude plugin validate plugins/witcher
 claude plugin test plugins/witcher        # the HUD and the /witcher command
 bash plugins/witcher/tests/wear.test.sh   # wear.sh against a throwaway config
 bash plugins/witcher/tests/sound.test.sh  # which persona plays, and which clip
-bash plugins/witcher/tests/timer.test.sh  # timer.sh with systemd and the banner stubbed
+bash plugins/witcher/tests/timer.test.sh  # timer.sh with systemd, the banner and the break screen stubbed
 ```
 
 ## Rights
@@ -153,4 +162,10 @@ An unofficial, non-commercial fan project, made under the CD PROJEKT RED Fan
 Content Guidelines. *The Witcher* and its characters belong to CD PROJEKT S.A.;
 the original books are by Andrzej Sapkowski. The clips are short excerpts:
 voice lines and game sounds of a few seconds, the longest 14 seconds of
-Lullaby of Woe. If you hold the rights and want them out, open an issue.
+Lullaby of Woe. The break-screen GIFs in `persona/breaks/` are short loops from
+the game's cutscenes, taken from GIPHY and Tenor and cut down to a few seconds. If you hold the rights
+and want them out, open an issue.
+
+The break screen is set in Alegreya by Huerta Tipográfica, under the SIL Open
+Font License 1.1 (`fonts/OFL.txt`); the two files are static SemiBold and
+Regular instances of the variable font from Google Fonts.

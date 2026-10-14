@@ -8,7 +8,8 @@ timer="$root/scripts/timer.sh"
 tmp="$(mktemp -d)" || exit 1; trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin" "$tmp/cfg/personas"
 export CLAUDE_CONFIG_DIR="$tmp/cfg" PATH="$tmp/bin:$PATH"
-unset CLAUDE_SOUND
+# No display: a persona's break screen must not open on the desktop running the tests
+unset CLAUDE_SOUND DISPLAY WAYLAND_DISPLAY
 state="$tmp/cfg/persona-timer"; calls="$tmp/calls.log"
 
 # The stub unit is "active" while $tmp/unit exists
@@ -112,10 +113,21 @@ echo other > "$tmp/cfg/personas/active"; : > "$calls"
 bash "$timer" set 5 > /dev/null; CLAUDE_SOUND=off bash "$timer" fire "$(fire_id)"
 expect "CLAUDE_SOUND=off keeps the banner and mutes the clip" 'grep -q notify-send "$calls" && ! grep -q paplay "$calls"'
 
+# A persona with a break screen opens it, and the banner stays away
+printf '#!/bin/bash\necho "break.py $*" >> "%s"\n' "$calls" > "$tmp/other/scripts/break.py"; chmod +x "$tmp/other/scripts/break.py"
+bash "$timer" set 5 > /dev/null; : > "$calls"; bash "$timer" fire "$(fire_id)"
+expect "the break screen gets the persona's root, title and phrase" 'grep -qx "break.py $tmp/other Тайм-аут $(jq -r .phrase "$state/rang.json")" "$calls"'
+expect "no banner on top of the break screen" '! grep -q notify-send "$calls"'
+expect "the clip plays with the break screen" 'grep -q "paplay $tmp/other/sounds/gong.oga" "$calls"'
+printf '#!/bin/bash\necho "break.py failed" >> "%s"; exit 1\n' "$calls" > "$tmp/other/scripts/break.py"
+bash "$timer" set 5 > /dev/null; : > "$calls"; bash "$timer" fire "$(fire_id)" 2> /dev/null
+expect "a break screen that fails to start still rings with the banner" 'grep -q "break.py failed" "$calls" && grep -q "notify-send --app-name=Claude Code Тайм-аут" "$calls"'
+rm "$tmp/other/scripts/break.py"
+
 # With no session having left its path yet, the plugin still finds itself
 me="$(jq -r .name "$root/.claude-plugin/plugin.json")"
 reset; echo "$me" > "$tmp/cfg/personas/active"
-bash "$timer" set 5 > /dev/null; bash "$timer" fire "$(fire_id)"
+bash "$timer" set 5 > /dev/null; bash "$timer" fire "$(fire_id)" 2> /dev/null
 expect "without roots, this plugin's own persona still speaks" 'grep -q "paplay $root/sounds/$(jq -r .userConfig.timerDoneSound.default "$root/.claude-plugin/plugin.json").oga" "$calls" && [[ "$(jq -r .persona "$state/rang.json")" == "$me" ]]'
 
 # A persona whose phrase list is empty falls back to the plain banner instead of failing
