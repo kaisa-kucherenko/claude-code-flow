@@ -1,19 +1,19 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "claude-code-flow",
-  "description": "Personas for Claude Code: a HUD, sounds, themes and spinner lines in one plugin each",
+  "description": "Personas for Claude Code: a HUD, sounds, themes, spinner lines and a break timer in one plugin each",
   "owner": { "name": "Kateryna Kucherenko", "url": "https://github.com/kaisa-kucherenko" },
   "plugins": [
     {
       "name": "richmond",
       "source": "./plugins/richmond",
-      "description": "AFC Richmond persona: match HUD, Roy Kent sounds, Nelson Road themes",
+      "description": "AFC Richmond persona: match HUD, Roy Kent sounds, Nelson Road themes, a /timer break screen",
       "category": "personas"
     },
     {
       "name": "witcher",
       "source": "./plugins/witcher",
-      "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD, game sounds, Corvo Bianco and Kaer Morhen themes",
+      "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD, game sounds, Corvo Bianco and Kaer Morhen themes, a /timer break screen",
       "category": "personas"
     }
   ]

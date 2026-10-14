@@ -24,7 +24,7 @@ yourself.
 | Status line | The context-% number that drives the whole workflow, with traffic-light thresholds (green <30%, yellow 30–39%, red at 40+). | [`statusline/`](statusline/) |
 | Agents | Implementers (Geralt/Lyutik), a three-model review panel (Agatha/Arthur/Dash), specialists (Jobs/Lauda/Gilfoyle), a diagram drawer (Ariel), a test pair (Sam writes, Dean breaks) with a shared `pytest-quality` skill. | [`agents/`](agents/) |
 | Precogs workflow | Orchestrates the panel: three reviewers in parallel, then a synthesis that dedupes and cross-votes findings. | [`workflows/`](workflows/) |
-| Personas | Claude Code dressed as a character, one plugin each: a HUD above the prompt, sounds, themes, spinner lines, status line. Two so far: AFC Richmond (*Ted Lasso*) and *The Witcher 3*. Linux, Ukrainian texts. | [`plugins/richmond/`](plugins/richmond/), [`plugins/witcher/`](plugins/witcher/) |
+| Personas | Claude Code dressed as a character, one plugin each: a HUD above the prompt, sounds, themes, spinner lines, status line, and a `/timer` break reminder that opens a break screen. Two so far: AFC Richmond (*Ted Lasso*) and *The Witcher 3*. Linux, Ukrainian texts. | [`plugins/richmond/`](plugins/richmond/), [`plugins/witcher/`](plugins/witcher/) |
 
 Each folder's README has the install steps and the reasoning; everything
 targets `~/.claude`. Run all install commands from the repo root. The personas
@@ -43,8 +43,8 @@ cuts the decisions into phases (`/spec`), runs them one at a time (`/implement`)
 implementation to agents (Geralt — backend, Lyutik — frontend), verifies
 results, and never burns its own context on writing code. The status line
 keeps the context % in view; at ~30% the work is handed off (`/handoff`) and a
-fresh session picks it up (`/pickup`). Diffs go to a review panel of three
-different models, briefed with nothing but the spec and the code. The output
+fresh session picks it up (`/pickup`). Diffs go to a review panel of two or three
+reviewers on different model families, briefed with nothing but the spec and the code. The output
 style plus the re-inject hook keep every reply short enough to actually read.
 
 ## License

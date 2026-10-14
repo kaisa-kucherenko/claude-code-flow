@@ -1,6 +1,6 @@
 {
   "name": "witcher",
-  "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD above the prompt, game sounds, Corvo Bianco and Kaer Morhen themes, campfire spinner and status lines",
+  "description": "The Witcher 3 persona: vitality, stamina and toxicity HUD above the prompt, game sounds, Corvo Bianco and Kaer Morhen themes, campfire spinner and status lines, a /timer break screen",
   "author": {
     "name": "Kateryna Kucherenko"
   },
